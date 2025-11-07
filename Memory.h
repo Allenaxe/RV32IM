@@ -20,7 +20,6 @@ namespace RV32IM {
       uint32_t Read(const uint32_t p_Address);
       void Write(const uint32_t& p_Address, const uint32_t& p_Value);
   };
-
 }
 
 #endif

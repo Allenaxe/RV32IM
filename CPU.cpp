@@ -8,19 +8,15 @@ namespace RV32IM {
     InstructionRegister = MemoryDataRegister;
     ProgramCounter += 1;
   }
-  int32_t CPU::SignExtend(uint32_t p_Immediate, uint32_t p_extend) {
-    int32_t mask = 1 << (p_extend - 1);
-    return (p_Immediate ^ mask) - mask;
-  }
   int32_t CPU::DecodeImm(uint8_t p_Opcode) {
     switch(p_Opcode) {
-      case 0x13: return SignExtend(InstructionRegister >> 20, 12); // ALU imm
-      case 0x03: return SignExtend(InstructionRegister >> 20, 12); // LOAD
-      case 0x23: return SignExtend(((InstructionRegister >> 25) << 5) | ((InstructionRegister >> 7) & 0x1F), 12); // STORE
-      case 0x63: return SignExtend(((InstructionRegister >> 31) << 12) | (((InstructionRegister >> 7) & 0x01) << 11) | (((InstructionRegister >> 25) & 0x3F) << 5) | (((InstructionRegister >> 8) & 0x0F) << 1), 11); // BRANCH
+      case 0x13: return SignExtend::extend(InstructionRegister >> 20, 12); // ALU imm
+      case 0x03: return SignExtend::extend(InstructionRegister >> 20, 12); // LOAD
+      case 0x23: return SignExtend::extend(((InstructionRegister >> 25) << 5) | ((InstructionRegister >> 7) & 0x1F), 12); // STORE
+      case 0x63: return SignExtend::extend(((InstructionRegister >> 31) << 12) | (((InstructionRegister >> 7) & 0x01) << 11) | (((InstructionRegister >> 25) & 0x3F) << 5) | (((InstructionRegister >> 8) & 0x0F) << 1), 11); // BRANCH
       case 0x37: return (InstructionRegister & ((1 << 20) - 1)); // LUI
       case 0x17: return (InstructionRegister & ((1 << 20) - 1)); // AUIPC
-      case 0x6F: return SignExtend(((InstructionRegister >> 31) << 20) | (((InstructionRegister >> 12) & 0xFF) << 12) | (((InstructionRegister >> 20) & 0x01) << 11) | (((InstructionRegister >> 25) & 0x3F) << 5) | (((InstructionRegister >> 21) & 0x0F) << 1), 12); // JAL
+      case 0x6F: return SignExtend::extend(((InstructionRegister >> 31) << 20) | (((InstructionRegister >> 12) & 0xFF) << 12) | (((InstructionRegister >> 20) & 0x01) << 11) | (((InstructionRegister >> 25) & 0x3F) << 5) | (((InstructionRegister >> 21) & 0x0F) << 1), 12); // JAL
       default: return 0;
     }
   }
