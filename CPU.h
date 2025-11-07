@@ -1,0 +1,41 @@
+#ifndef CPU_PROCESSOR
+#define CPU_PROCESSOR
+#include <stdint.h>
+#include <iostream>
+#include <bitset>
+#include "Memory.h"
+#include "Instruction.h"
+
+#define NUMBER_REGISTER 32
+
+namespace RV32IM {  
+  class CPU {
+    //   public:
+    //       const byte c_ReservedAddress;   const byte c_BaseAddress;   const byte c_AddressCeiling;
+      private:
+          uint32_t ProgramCounter;
+          uint32_t Register[NUMBER_REGISTER];
+          uint32_t MAR;
+          uint32_t MDR;
+          uint32_t IR;
+        //   bool m_OverflowError;
+        //   bool m_UnderflowError;   
+        //   bool m_SignedMode;   
+        //   bool m_Halt;
+
+          Memory* TheMemory;
+          void Fetch();
+          int32_t DecodeImm(uint8_t p_Opcode);
+          int32_t SignExtend(uint32_t p_Immediate, uint32_t p_extend);
+          Instruction Decode();
+
+          void Print(Instruction &ins);
+
+      public:
+        CPU(Memory* p_TheMemory);
+        // ~CPU();
+        // void Reset();
+        void Execute();
+ };
+}
+#endif
