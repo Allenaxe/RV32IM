@@ -1,3 +1,7 @@
+# Customized
+test/
+cpu_simulator
+
 # Prerequisites
 *.d
 
