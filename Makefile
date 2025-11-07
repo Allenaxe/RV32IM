@@ -3,7 +3,7 @@ CXXFLAGS := -std=c++17 -Wall -Wextra -O2
 
 TARGET := cpu_simulator
 
-SRCS := main.cpp CPU.cpp Memory.cpp
+SRCS := $(wildcard *.cpp)
 
 OBJS := $(SRCS:.cpp=.o)
 
