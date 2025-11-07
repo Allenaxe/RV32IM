@@ -4,6 +4,7 @@
 #include <iostream>
 #include <bitset>
 #include "Memory.h"
+#include "Component.h"
 #include "Instruction.h"
 
 #define NUMBER_REGISTER 32
@@ -26,7 +27,6 @@ namespace RV32IM {
           Memory* TheMemory;
           void Fetch();
           int32_t DecodeImm(uint8_t p_Opcode);
-          int32_t SignExtend(uint32_t p_Immediate, uint32_t p_extend);
           Instruction Decode();
 
           void Print(Instruction &instr);
