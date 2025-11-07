@@ -15,9 +15,9 @@ namespace RV32IM {
       private:
           uint32_t ProgramCounter;
           uint32_t Register[NUMBER_REGISTER];
-          uint32_t MAR;
-          uint32_t MDR;
-          uint32_t IR;
+          uint32_t MemoryAddressRegister;
+          uint32_t MemoryDataRegister;
+          uint32_t InstructionRegister;
         //   bool m_OverflowError;
         //   bool m_UnderflowError;   
         //   bool m_SignedMode;   
@@ -29,7 +29,7 @@ namespace RV32IM {
           int32_t SignExtend(uint32_t p_Immediate, uint32_t p_extend);
           Instruction Decode();
 
-          void Print(Instruction &ins);
+          void Print(Instruction &instr);
 
       public:
         CPU(Memory* p_TheMemory);
