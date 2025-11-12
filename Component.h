@@ -10,6 +10,21 @@
 
 namespace RV32IM {
 	class ControlUnit {
+		/********************************************************
+		 * - RegWrite ( 1 bit ) : register can write
+		 * - ALUSrc ( 1 bit ) : `Op2` in ALU is `immediate` or `rs2`
+		 * - MemRead ( 1 bit ) : data memory can read
+		 * - MemWrite ( 1 bit ) : data memory can write
+		 * - Branch ( 1 bit ) : branch instruction
+		 * - Jump ( 1 bit ) : Jump instruction
+		 * - MemtoReg ( 1 bit ) - data memory write into register
+		 * - ALUOp ( 3 bits ) - ALU Operation
+		 * 	- `000` : Load / Store
+		 * 	- `001` : Branch
+		 *  - `010` : R Type
+		 * 	- `011` : I Type
+		 * 	- Other: Reserved
+		********************************************************/
 		public:
 			static std::bitset <10> control_signal(std::bitset<7> &p_Opcode);
 	};
