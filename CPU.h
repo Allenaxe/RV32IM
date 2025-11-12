@@ -1,12 +1,12 @@
 #ifndef CPU_PROCESSOR
 #define CPU_PROCESSOR
 
-#include <stdint.h>
 #include <iostream>
+#include <cstdint>
 #include <bitset>
 #include "Memory.h"
 #include "Component.h"
-#include "Instruction.h"
+#include "Structure.h"
 
 namespace RV32IM {
     class CPU {
@@ -28,10 +28,9 @@ namespace RV32IM {
 
             Memory* TheMemory;
             void Fetch();
-            int32_t DecodeImm(std::bitset<7> p_Opcode);
-            Instruction Decode();
+            DecodeOutput Decode(uint32_t wd);
 
-            void Print(Instruction &instr, uint32_t imm);
+            // void Print(Instruction &instr, uint32_t imm);
 
         public:
             CPU(Memory* p_TheMemory);
