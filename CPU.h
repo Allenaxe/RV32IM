@@ -31,7 +31,7 @@ namespace RV32IM {
             int32_t DecodeImm(std::bitset<7> p_Opcode);
             Instruction Decode();
 
-            void Print(Instruction &instr);
+            void Print(Instruction &instr, uint32_t imm);
 
         public:
             CPU(Memory* p_TheMemory);

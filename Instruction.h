@@ -11,7 +11,6 @@ namespace RV32IM {
         std::bitset<5> rs2;
         std::bitset<3> funct3;
         std::bitset<7> funct7;
-        uint32_t imm;
     };
 }
 

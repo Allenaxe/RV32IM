@@ -10,8 +10,23 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
-    int32_t SignExtend::extend(uint32_t p_Immediate, uint32_t p_extend) {
-        int32_t mask = 1 << (p_extend - 1);
-        return (p_Immediate ^ mask) - mask;
-    }
+    // std::bitset <9> ControlUnit::control_signal(std::bitset<7> p_Opcode) {
+    //     bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
+    //     bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
+    //     bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
+    //     bool isBType = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
+    //     bool isUType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];
+    //     bool isJType = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & p_Opcode[3] & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];
+    //     bool isLoad = (~p_Opcode[6]) & (~p_Opcode[5]) & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
+
+    //     bool RegWrite = isRType | isIType | isLoad | isUType | isJType;
+    //     bool ALUSrc = isIType | isLoad | isSType | isUType | isJType;
+    //     bool MemRead = isLoad;
+    //     bool MemWrite = isSType;
+    //     bool Branch = isBType;
+    //     bool Jump = isJType;
+    //     bool MemtoReg = isLoad;
+    //     bool ALUOp_1 = isRType | isIType;
+    //     bool ALUOp_2 = is
+    // }
 }

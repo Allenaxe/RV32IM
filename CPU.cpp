@@ -53,11 +53,15 @@ namespace RV32IM {
         instr.rs1 = (IR & 0x000F'8000) >> 15;       // IR[19:15]
         instr.rs2 = (IR & 0x01F0'0000) >> 20;       // IR[24:20]
         instr.funct7 = (IR & 0xFE00'0000) >> 25;    // IR[31:25]
-        instr.imm = DecodeImm(instr.opcode);
+        
+        uint32_t imm = DecodeImm(instr.opcode);;
+        
+        Print(instr, imm);
+
         return instr;
     }
 
-    void CPU::Print(Instruction &instr) {
+    void CPU::Print(Instruction &instr, uint32_t imm) {
         std::cout << "Original insturction:\n";
         std::cout << std::bitset<32>(IR) << std::endl << std::endl;
 
@@ -69,13 +73,12 @@ namespace RV32IM {
         std::cout << "rs1    : " << instr.rs1 << '\n';
         std::cout << "rs2    : " << instr.rs2 << '\n';
         std::cout << "funct7 : " << instr.funct7 << '\n';
-        std::cout << "imm    : " << std::bitset<32>(instr.imm) << '\n';
+        std::cout << "imm    : " << std::bitset<32>(imm) << '\n';
         std::cout << "------------------------------------------------\n";
     }
 
     void CPU::Execute() {
         Fetch();
         Instruction instr = Decode();
-        Print(instr);
     }
 }

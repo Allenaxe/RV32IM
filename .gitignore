@@ -1,5 +1,6 @@
 # Customized
 test/
+.vscode/
 cpu_simulator
 
 # Prerequisites
