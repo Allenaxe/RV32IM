@@ -1,9 +1,20 @@
 #include "CPU.h"
 #include "Memory.h"
+#include "Loader.h"
+
 
 int main() {
-    RV32IM::Memory* memory = new RV32IM::Memory();
-    memory->Write(0, 0b0000'0000'1010'0000'1000'0010'1001'0011);
-    RV32IM::CPU* cpu = new RV32IM::CPU(memory);
-    cpu->Execute();
+    RV32IM::Memory myMemory;
+
+    RV32IM::Loader myLoader;
+    std::unique_ptr<RV32IM::Segmentation> mySeg = myLoader.Load("machine_codes.txt", myMemory);
+    std::cout << mySeg -> START_ADDR << " " << mySeg -> DATA_ADDR << " " << mySeg -> BSS_ADDR << " "
+              << mySeg -> HEAP_ADDR << " " << mySeg -> END_ADDR << std::endl;
+
+    
+    
+
+
+    // RV32IM::CPU* cpu = new RV32IM::CPU(myMemory);
+    // cpu->Execute();
 }

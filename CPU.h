@@ -25,7 +25,7 @@ namespace RV32IM {
             // bool m_OverflowError;
             // bool m_UnderflowError;
             // bool m_SignedMode;
-            // bool m_Halt;
+            // bool m_Halt;  
 
             Memory* TheMemory;
             void Fetch();

@@ -2,6 +2,7 @@
 
 namespace RV32IM {
     CPU::CPU(Memory* p_TheMemory): TheMemory(p_TheMemory) {}
+    
     void CPU::Fetch() {
         MAR = PC;
         MDR = TheMemory->Read(MDR);
