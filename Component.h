@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <bitset>
 #include <tuple>
+#include <iostream>
 
 #include "Structure.h"
 
@@ -28,6 +29,7 @@ namespace RV32IM {
 		public:
 			static std::bitset <10> control_signal(std::bitset<7> &p_Opcode);
 	};
+
 	class RegisterFile {
 		private:
 			uint32_t Register[NUMBER_REGISTER];
@@ -42,6 +44,17 @@ namespace RV32IM {
 		private:
 			static uint32_t decodetype(std::bitset<7> p_Opcode);
 			static int32_t extend(uint32_t p_Immediate, uint32_t p_Extend);
+    };
+	
+	class ALU {
+        public:
+			/********************************************************
+			 * - AluControl ( 4 bits ) - 3 bits funct3 & 1 bit funct7
+			********************************************************/
+            static int32_t Operate(DecodeOutput p_DecodeOutput);
+		private:
+            static int32_t Adder(uint32_t src1, uint32_t src2, bool cin, bool &carry);
+			static std::bitset<4> AluControl(uint8_t p_funct3, int8_t p_funct7);
     };
 }
 
