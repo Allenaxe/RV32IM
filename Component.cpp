@@ -147,6 +147,16 @@ namespace RV32IM {
         return type;
     }
 
+    int32_t ALU::OpA(uint32_t PC, uint32_t src1, bool p_Selector) {
+        // signal: Branch / Jump = 1
+        return p_Selector ? static_cast<int32_t>(PC): static_cast<int32_t>(src1);
+    }
+
+    int32_t ALU::OpB(uint32_t src2, int32_t imm, bool p_Selector) {
+        // signal: ALUsrc = 1
+        return p_Selector ? static_cast<int32_t>(imm) : static_cast<int32_t>(src2);
+    }
+
     int32_t ALU::Operate(DecodeOutput p_DecodeOutput){
         std::bitset<4> aluControl = ALU::AluControl(p_DecodeOutput.funct3.to_ulong(), p_DecodeOutput.funct7.to_ulong());
         switch ((p_DecodeOutput.control_signal.to_ulong() & 0b111)){
