@@ -28,7 +28,7 @@ namespace RV32IM {
 
             Memory* TheMemory;
             void Fetch();
-            DecodeOutput Decode(uint32_t wd);
+            DecodeOutput Decode();
 
             // void Print(Instruction &instr, uint32_t imm);
 
