@@ -26,22 +26,22 @@ namespace RV32IM {
 		 * 	- Other: Reserved
 		********************************************************/
 		public:
-			static std::bitset <10> control_signal(std::bitset<7> &p_Opcode);
+			static std::bitset <10> ControlSignal(std::bitset<7> &p_Opcode);
 	};
 	class RegisterFile {
 		private:
 			uint32_t Register[NUMBER_REGISTER];
 		public:
-			RegisterFileRead read(uint8_t rs1, uint8_t rs2);
-			void write(uint8_t rd, uint32_t wd, bool we);
+			RegisterFileRead Read(uint8_t rs1, uint8_t rs2);
+			void Write(uint8_t rd, uint32_t wd, bool we);
 	};
 
     class ImmediateGenerator {
         public:
-			static int32_t generate(uint32_t &p_Instr);
+			static int32_t Generate(uint32_t &p_Instr);
 		private:
-			static uint32_t decodetype(std::bitset<7> p_Opcode);
-			static int32_t extend(uint32_t p_Immediate, uint32_t p_Extend);
+			static uint32_t DecodeType(std::bitset<7> p_Opcode);
+			static int32_t Extend(uint32_t p_Immediate, uint32_t p_Extend);
     };
 }
 
