@@ -28,6 +28,7 @@ namespace RV32IM {
 		public:
 			static std::bitset <10> ControlSignal(std::bitset<7> &p_Opcode);
 	};
+
 	class RegisterFile {
 		private:
 			uint32_t Register[NUMBER_REGISTER];
@@ -43,6 +44,14 @@ namespace RV32IM {
 			static uint32_t DecodeType(std::bitset<7> p_Opcode);
 			static int32_t Extend(uint32_t p_Immediate, uint32_t p_Extend);
     };
+
+	class PCControlUnit {
+		private:
+			uint32_t PC;
+		public:
+			void UpdatePC();
+			uint32_t GetPC();
+	};
 }
 
 #endif

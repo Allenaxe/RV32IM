@@ -116,4 +116,12 @@ namespace RV32IM {
                 return 0;
         }
     }
+
+    uint32_t PCControlUnit::GetPC() {
+        return PC;
+    }
+
+    void PCControlUnit::UpdatePC() {
+        PC = PC + 4;
+    }
 }

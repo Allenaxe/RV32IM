@@ -1,12 +1,12 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(Memory* p_TheMemory): RF(new RegisterFile()), TheMemory(p_TheMemory) {}
+    CPU::CPU(Memory* p_TheMemory): PC(new PCControlUnit()), RF(new RegisterFile()), TheMemory(p_TheMemory) {}
     void CPU::Fetch() {
-        MAR = PC;
+        MAR = PC->GetPC();
         MDR = TheMemory->Read(MDR);
         IR = MDR;
-        PC += 1;
+        PC->UpdatePC();
     }
 
     DecodeOutput CPU::Decode(uint32_t wd) { 

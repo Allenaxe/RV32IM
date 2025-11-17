@@ -14,7 +14,6 @@ namespace RV32IM {
         //     const byte c_ReservedAddress;   const byte c_BaseAddress;   const byte c_AddressCeiling;
 
         private:
-            uint32_t PC;                            // ProgramCounter
             uint32_t MAR;                           // MemoryAddressRegister
             uint32_t MDR;                           // MemoryDataRegister
             uint32_t IR;                            // InstructionRegister
@@ -24,6 +23,7 @@ namespace RV32IM {
             // bool m_SignedMode;
             // bool m_Halt;
 
+            PCControlUnit* PC;
             RegisterFile* RF;
 
             Memory* TheMemory;
