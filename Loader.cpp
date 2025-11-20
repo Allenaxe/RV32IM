@@ -23,19 +23,23 @@ namespace RV32IM {
             numInstr++;
         }
 
-        Segmentation mySegment = p_memory.Allocate(numInstr);
+        // Allocate a segmentation
+        // Args: p_instrLength is number of instructions
+        uint32_t StartAddr = 0x0000'1000;               // Note: Preserved for dynamic allocation of segmentation
+        uint32_t EndAddr   = 0x0000'2000;
+        Segmentation mySeg = Segmentation(StartAddr, EndAddr, numInstr*4);
 
         std::uint32_t Offset = 0;
 
         for (auto it : InstrBuffer) {
-            p_memory.Write(mySegment.START_ADDR + Offset, it);
+            mySeg.Write(mySeg.START_ADDR + Offset, it);
             Offset += 4;        // sizeof(uint32_t) = 4
         }
 
-        for(uint32_t idx = 0; idx < Offset; idx+=4){
-            std::cout << static_cast<std::bitset<32>>(p_memory.Read(mySegment.START_ADDR + idx)) << std::endl;
-        }
+        // for(uint32_t idx = 0; idx < Offset; idx+=4){
+        //     std::cout << static_cast<std::bitset<32>>(p_memory.Read(mySegment.START_ADDR + idx)) << std::endl;
+        // }
 
-        return std::make_unique<Segmentation>(mySegment);
+        return std::make_unique<Segmentation>(mySeg);
     }
 }

@@ -27,7 +27,7 @@ namespace RV32IM {
             // bool m_SignedMode;
             // bool m_Halt;  
 
-            Memory* TheMemory;
+            std::shared_ptr<Segmentation> ProgSeg;                // Program Segmentation
             void Fetch();
             int32_t DecodeImm(std::bitset<7> p_Opcode);
             Instruction Decode();
@@ -35,7 +35,7 @@ namespace RV32IM {
             void Print(Instruction &instr);
 
         public:
-            CPU(Memory* p_TheMemory);
+            CPU(std::shared_ptr<Segmentation> p_ProgSeg);
             // ~CPU();
             // void Reset();
             void Execute();

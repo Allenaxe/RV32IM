@@ -5,8 +5,4 @@ namespace RV32IM {
         int32_t mask = 1 << (p_extend - 1);
         return (p_Immediate ^ mask) - mask;
     }
-
-    void DataMemory::Store (std::unique_ptr<Segmentation> Seg, uint32_t addr, uint32_t data) {
-        ; // TODO
-    }
 }
