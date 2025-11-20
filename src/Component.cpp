@@ -72,12 +72,12 @@ namespace RV32IM {
             (isAUIPC        ) ;
     };
 
-    int32_t ImmediateGenerator::Extend(uint32_t p_Immediate, uint32_t p_Extend) {
+    uint32_t ImmediateGenerator::Extend(uint32_t p_Immediate, uint32_t p_Extend) {
         int32_t mask = 1 << (p_Extend - 1);
         return (p_Immediate ^ mask) - mask;
     };
 
-    int32_t ImmediateGenerator::Generate(uint32_t &p_Instr) {
+    uint32_t ImmediateGenerator::Generate(uint32_t &p_Instr) {
 
         std::bitset<7> opcode {p_Instr & 0x0000'007F}; 
 
