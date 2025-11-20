@@ -1,14 +1,12 @@
 #ifndef CPU_PROCESSOR
 #define CPU_PROCESSOR
 
-#include <stdint.h>
 #include <iostream>
+#include <cstdint>
 #include <bitset>
 #include "Memory.h"
 #include "Component.h"
-#include "Instruction.h"
-
-#define NUMBER_REGISTER 32
+#include "Structure.h"
 
 namespace RV32IM {
     class CPU {
@@ -17,7 +15,6 @@ namespace RV32IM {
 
         private:
             uint32_t PC;                            // ProgramCounter
-            uint32_t Register[NUMBER_REGISTER];
             uint32_t MAR;                           // MemoryAddressRegister
             uint32_t MDR;                           // MemoryDataRegister
             uint32_t IR;                            // InstructionRegister
@@ -27,12 +24,12 @@ namespace RV32IM {
             // bool m_SignedMode;
             // bool m_Halt;  
 
+            RegisterFile* RF;            
             std::shared_ptr<Segmentation> ProgSeg;                // Program Segmentation
             void Fetch();
-            int32_t DecodeImm(std::bitset<7> p_Opcode);
-            Instruction Decode();
+            DecodeOutput Decode(uint32_t wd);
 
-            void Print(Instruction &instr);
+            // void Print(Instruction &instr, uint32_t imm);
 
         public:
             CPU(std::shared_ptr<Segmentation> p_ProgSeg);
