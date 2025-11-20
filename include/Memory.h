@@ -6,7 +6,7 @@
 namespace RV32IM {
     typedef unsigned char byte;
 
-    class Memory {
+    class MainMemory {
         public:
             const uint32_t c_MaxAddress;
 
@@ -14,8 +14,8 @@ namespace RV32IM {
             uint32_t* m_MemorySpace;
 
         public:
-            Memory();
-            ~Memory();
+            MainMemory();
+            ~MainMemory();
             void Clear();
             uint32_t Read(const uint32_t p_Address);
             void Write(const uint32_t& p_Address, const uint32_t& p_Value);
