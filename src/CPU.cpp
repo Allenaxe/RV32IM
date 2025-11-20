@@ -40,51 +40,61 @@ namespace RV32IM {
     void CPU::Run() {
 
         // while instruction is not empty, run
+        int cycle = 0;
 
-        // ---------------------------------------------
-        // Write-Back (WB) Stage
-        // ---------------------------------------------
-        MEM_WB_Data writeback_input = MEM_WB.Read();
-        WriteBack(writeback_input);
+        while (true) {
 
-        // ---------------------------------------------
-        // Memory (MEM) Stage
-        // ---------------------------------------------
-        EX_MEM_Data memory_input = EX_MEM.Read();
-        MEM_WB_Data memory_output = Memory(memory_input);
-        Record->Record(memory_output);
-        MEM_WB.Write(memory_output);
+            // Terminate Condition
+            if (cycle == 5) break;
 
-        // ---------------------------------------------
-        // Execute (EX) Stage
-        // ---------------------------------------------
-        ID_EX_Data execute_input = ID_EX.Read();
-        EX_MEM_Data execute_output = Execute(execute_input);
-        Record->Record(execute_output);
-        EX_MEM.Write(execute_output);
-        
-        // ---------------------------------------------
-        // Decode (ID) Stage
-        // ---------------------------------------------
-        IF_ID_Data decode_input = IF_ID.Read();
-        ID_EX_Data decode_output = Decode(decode_input);
-        Record->Record(decode_output);
-        ID_EX.Write(decode_output);
-        
-        // ---------------------------------------------
-        // Fetch (IF) Stage
-        // ---------------------------------------------
-        Fetch();
-        IF_ID_Data fetch_output {PC, IR};
-        Record->Record(fetch_output);
-        IF_ID.Write(fetch_output);
+            // ---------------------------------------------
+            // Write-Back (WB) Stage
+            // ---------------------------------------------
+            MEM_WB_Data writeback_input = MEM_WB.Read();
+            WriteBack(writeback_input);
 
-        IF_ID.Update();
-        ID_EX.Update();
-        EX_MEM.Update();
-        MEM_WB.Update();
+            // ---------------------------------------------
+            // Memory (MEM) Stage
+            // ---------------------------------------------
+            EX_MEM_Data memory_input = EX_MEM.Read();
+            MEM_WB_Data memory_output = Memory(memory_input);
+            Record->Record(memory_output);
+            MEM_WB.Write(memory_output);
+
+            // ---------------------------------------------
+            // Execute (EX) Stage
+            // ---------------------------------------------
+            ID_EX_Data execute_input = ID_EX.Read();
+            EX_MEM_Data execute_output = Execute(execute_input);
+            Record->Record(execute_output);
+            EX_MEM.Write(execute_output);
+            
+            // ---------------------------------------------
+            // Decode (ID) Stage
+            // ---------------------------------------------
+            IF_ID_Data decode_input = IF_ID.Read();
+            ID_EX_Data decode_output = Decode(decode_input);
+            Record->Record(decode_output);
+            ID_EX.Write(decode_output);
+            
+            // ---------------------------------------------
+            // Fetch (IF) Stage
+            // ---------------------------------------------
+            Fetch();
+            IF_ID_Data fetch_output {PC, IR};
+            Record->Record(fetch_output);
+            IF_ID.Write(fetch_output);
+
+            IF_ID.Update();
+            ID_EX.Update();
+            EX_MEM.Update();
+            MEM_WB.Update();
+
+            ++cycle;
+        }
 
         // After Loop
+        std::cout << "Cycle: " << cycle << '\n';
         Record->Print();
     }
 }
