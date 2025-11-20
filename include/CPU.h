@@ -60,7 +60,7 @@ namespace RV32IM {
             Printer* Record;
 
         public:
-            CPU(MainMemory* p_TheMemory);
+            CPU(MainMemory* p_TheMemory, std::string& Filename, bool ConsoleOutput);
             // ~CPU();
             // void Reset();
             void Run();
