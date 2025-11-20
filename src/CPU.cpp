@@ -94,7 +94,6 @@ namespace RV32IM {
         }
 
         // After Loop
-        std::cout << "Cycle: " << cycle << '\n';
         Record->Print();
     }
 }

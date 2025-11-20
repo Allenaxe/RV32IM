@@ -7,8 +7,9 @@ namespace RV32IM {
     }
 
     void Utility::Print() {
-        for (auto& out : Trace) {
-            std::visit(Printer(), out);
+        for (int i = 1; i < Trace.size() ; ++i) {
+            std::cout << "Cycle: " << i << '\n';
+            std::visit(Printer(), Trace[i]);
         }
     }
 }
