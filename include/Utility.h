@@ -1,4 +1,3 @@
-
 #ifndef CPU_UTILITY
 #define CPU_UTILITY
 #include <variant>
@@ -7,15 +6,19 @@
 
 namespace RV32IM {
 
-    using Output = std::variant<IF_ID_Data, ID_EX_Data, EX_MEM_Data, MEM_WB_Data>;
-
     class Utility {
         private:
-            std::vector<Output> Trace;
+            std::vector<CycleSnapshot> History;
+            CycleSnapshot CurrentCycleSnapshot;
             
         public:
-            void Record(Output p_Output);
-            void Print();
+            void RecordState(const IF_ID_Data& p_Data);
+            void RecordState(const ID_EX_Data& p_Data);
+            void RecordState(const EX_MEM_Data& p_Data);
+            void RecordState(const MEM_WB_Data& p_Ddata);
+            void RecordState(const WB_Data& p_Ddata);
+            void EndCycle(int cycle_num);
+            void PrintTrace();
     };
 }
 

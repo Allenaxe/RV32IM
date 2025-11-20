@@ -52,7 +52,7 @@ namespace RV32IM {
             ID_EX_Data Decode(IF_ID_Data& p_DecodeInput);
             EX_MEM_Data Execute(ID_EX_Data& p_ExecuteInput);
             MEM_WB_Data Memory(EX_MEM_Data& p_MemoryInput);
-            void WriteBack(MEM_WB_Data& p_WriteBackInput);
+            WB_Data WriteBack(MEM_WB_Data& p_WriteBackInput);
 
             // ---------------------------------------------
             // Utility

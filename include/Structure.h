@@ -1,6 +1,7 @@
 #ifndef CPU_STRUCTURE
 #define CPU_STRUCTURE
 #include <iostream>
+#include <optional>
 #include <cstdint>
 #include <bitset>
 
@@ -58,20 +59,36 @@ namespace RV32IM {
         // ControlSignals ctrl;
     };
 
+     struct WB_Data {
+        uint32_t writeback_data;
+        std::bitset<5> rd;
+        std::bitset<10> control_signal;
+        // ControlSignals ctrl;
+    };
+
+    struct CycleSnapshot {
+        int cycle_number;
+        std::optional<IF_ID_Data>  IF_data;
+        std::optional<ID_EX_Data>  ID_data;
+        std::optional<EX_MEM_Data> EX_data;
+        std::optional<MEM_WB_Data> MEM_data;
+        std::optional<WB_Data> WB_data;
+    };
+
     struct Printer { 
         void operator() (const IF_ID_Data& out) const {
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "[FETCH]\n";
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "Program Counter: " << out.pc << '\n';
             std::cout << "Instruction    : " << out.inst << '\n';
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
         }
 
         void operator() (const ID_EX_Data& out) const {
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "[DECODE]\n";
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "rs1            : " << out.rs1 << '\n';
             std::cout << "rs2            : " << out.rs2 << '\n';
             std::cout << "rd             : " << out.rd << '\n';
@@ -79,29 +96,39 @@ namespace RV32IM {
             std::cout << "funct7         : " << out.funct7 << '\n';
             std::cout << "imm            : " << std::bitset<32>(out.imm) << "\n";
             std::cout << "control signal : " << out.control_signal << "\n";
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
         }
 
         void operator() (const EX_MEM_Data& out) const {
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "[EXECUTE]\n";
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "alu result     : " << out.alu_result << '\n';
             std::cout << "write data     : " << out.write_data << '\n';
             std::cout << "rd             : " << out.rd << '\n';
             std::cout << "control signal : " << out.control_signal << "\n";
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
         }
 
         void operator() (const MEM_WB_Data& out) const {
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "[MEMORY]\n";
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
             std::cout << "mem data       : " << out.mem_data << '\n';
             std::cout << "alu result     : " << out.alu_result << '\n';
             std::cout << "rd             : " << out.rd << '\n';
             std::cout << "control signal : " << out.control_signal << '\n';
-            std::cout << "-------------------------------------------\n";
+            std::cout << "-------------------------------------------------\n";
+        }
+
+        void operator() (const WB_Data& out) const {
+            std::cout << "-------------------------------------------------\n";
+            std::cout << "[WRITEBACK]\n";
+            std::cout << "-------------------------------------------------\n";
+            std::cout << "writeback data : " << out.writeback_data << '\n';
+            std::cout << "rd             : " << out.rd << '\n';
+            std::cout << "control signal : " << out.control_signal << '\n';
+            std::cout << "-------------------------------------------------\n";
         }
     };
 }

@@ -33,32 +33,33 @@ namespace RV32IM {
         return MEM_WB_Data {};
     }
 
-    void CPU::WriteBack(MEM_WB_Data& p_WriteBackInput) {
-
+    WB_Data CPU::WriteBack(MEM_WB_Data& p_WriteBackInput) {
+        return WB_Data {};
     }
 
     void CPU::Run() {
 
         // while instruction is not empty, run
-        int cycle = 0;
+        int cycle = 1;
 
         while (true) {
 
             // Terminate Condition
-            if (cycle == 5) break;
+            if (cycle == 6) break;
 
             // ---------------------------------------------
             // Write-Back (WB) Stage
             // ---------------------------------------------
             MEM_WB_Data writeback_input = MEM_WB.Read();
-            WriteBack(writeback_input);
+            WB_Data writeback_output = WriteBack(writeback_input);
+            Record->RecordState(writeback_output);
 
             // ---------------------------------------------
             // Memory (MEM) Stage
             // ---------------------------------------------
             EX_MEM_Data memory_input = EX_MEM.Read();
             MEM_WB_Data memory_output = Memory(memory_input);
-            Record->Record(memory_output);
+            Record->RecordState(memory_output);
             MEM_WB.Write(memory_output);
 
             // ---------------------------------------------
@@ -66,7 +67,7 @@ namespace RV32IM {
             // ---------------------------------------------
             ID_EX_Data execute_input = ID_EX.Read();
             EX_MEM_Data execute_output = Execute(execute_input);
-            Record->Record(execute_output);
+            Record->RecordState(execute_output);
             EX_MEM.Write(execute_output);
             
             // ---------------------------------------------
@@ -74,7 +75,7 @@ namespace RV32IM {
             // ---------------------------------------------
             IF_ID_Data decode_input = IF_ID.Read();
             ID_EX_Data decode_output = Decode(decode_input);
-            Record->Record(decode_output);
+            Record->RecordState(decode_output);
             ID_EX.Write(decode_output);
             
             // ---------------------------------------------
@@ -82,7 +83,7 @@ namespace RV32IM {
             // ---------------------------------------------
             Fetch();
             IF_ID_Data fetch_output {PC, IR};
-            Record->Record(fetch_output);
+            Record->RecordState(fetch_output);
             IF_ID.Write(fetch_output);
 
             IF_ID.Update();
@@ -90,10 +91,11 @@ namespace RV32IM {
             EX_MEM.Update();
             MEM_WB.Update();
 
+            Record->EndCycle(cycle);
             ++cycle;
         }
 
         // After Loop
-        Record->Print();
+        Record->PrintTrace();
     }
 }
