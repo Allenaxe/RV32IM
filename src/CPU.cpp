@@ -1,7 +1,7 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(MainMemory* p_TheMemory, std::string& Filename, bool ConsoleOutput): RF(new RegisterFile()), TheMemory(p_TheMemory), Record(new Printer(Filename, ConsoleOutput)) {}
+    CPU::CPU(MainMemory* p_TheMemory, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), TheMemory(p_TheMemory), Record(new Printer(Filename, ConsoleOutput)) {}
     void CPU::Fetch() {
         MAR = PC;
         MDR = TheMemory->Read(MAR);
