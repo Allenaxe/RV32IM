@@ -4,7 +4,7 @@ namespace RV32IM {
     CPU::CPU(MainMemory* p_TheMemory): RF(new RegisterFile()), TheMemory(p_TheMemory), Record(new Utility()) {}
     void CPU::Fetch() {
         MAR = PC;
-        MAR = TheMemory->Read(MDR);
+        MDR = TheMemory->Read(MAR);
         IR = MDR;
         PC += 1;
     }
@@ -83,5 +83,8 @@ namespace RV32IM {
         ID_EX.Update();
         EX_MEM.Update();
         MEM_WB.Update();
+
+        // After Loop
+        Record->Print();
     }
 }
