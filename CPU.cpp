@@ -49,11 +49,16 @@ namespace RV32IM {
     //     std::cout << "------------------------------------------------\n";
     // }
 
-    void CPU::Execute() {
+    ExecuteOutput CPU::Execute() {
         Fetch();
         uint32_t wd = 0;                // write back data
         DecodeOutput decode_output = Decode(wd);
-        int32_t alu_output = ALU::Operate(decode_output);
+
+        int32_t opA = ALU::OpA(PC, decode_output.rs1, (decode_output.control_signal[4] | decode_output.control_signal[5]));
+        int32_t opB = ALU::OpB(decode_output.rs2, decode_output.imm, decode_output.control_signal[8]);
+        uint32_t aluControl = ALU::AluControl(decode_output.funct3.to_ulong(), decode_output.funct7.to_ulong());
+        int32_t control_signal = decode_output.control_signal.to_ulong() & 0b111;
+        int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
 
 
         std::cout << "Immediate: " << decode_output.imm << '\n';
@@ -61,5 +66,7 @@ namespace RV32IM {
         std::cout << "rs2: " << decode_output.rs2 << '\n';
         std::cout << "Control Signal: " << decode_output.control_signal << '\n';
         std::cout << "ALU Output: " << alu_output << std::endl;
+        
+        return ExecuteOutput {static_cast<uint32_t>(alu_output), alu_output == 0};
     }
 }

@@ -138,13 +138,13 @@ namespace RV32IM {
         return (int32_t)result;
     }
 
-    std::bitset<4> ALU::AluControl(uint8_t p_funct3, int8_t p_funct7){
+    uint32_t ALU::AluControl(uint8_t p_funct3, int8_t p_funct7){
         // return funct3(3bit)+funct7(1bit)
         // determine calculate type
         std::bitset<4> type = p_funct3;
         type <<= 1;
         type[0] = p_funct7;
-        return type;
+        return type.to_ulong();
     }
 
     int32_t ALU::OpA(uint32_t PC, uint32_t src1, bool p_Selector) {
@@ -157,123 +157,131 @@ namespace RV32IM {
         return p_Selector ? static_cast<int32_t>(imm) : static_cast<int32_t>(src2);
     }
 
-    int32_t ALU::Operate(DecodeOutput p_DecodeOutput){
-        std::bitset<4> aluControl = ALU::AluControl(p_DecodeOutput.funct3.to_ulong(), p_DecodeOutput.funct7.to_ulong());
-        switch ((p_DecodeOutput.control_signal.to_ulong() & 0b111)){
+    // int32_t ALU::Operate(DecodeOutput p_DecodeOutput)
+    int32_t ALU::Operate(uint32_t p_aluOp, int32_t control_signal, int32_t p_opA, int32_t p_opB) {
+        switch ((control_signal)){
             case 0b000: // Load / Store
-                return p_DecodeOutput.rs1 + p_DecodeOutput.imm;
+                return p_opA + p_opB;
 
             case 0b001: // Branch
                 // return PC + imm
-                switch (aluControl.to_ulong()){
+                switch (p_aluOp){
                     case 0000:
                     case 0001: // beq
-                        if(p_DecodeOutput.rs1 == p_DecodeOutput.rs2); // return PC + imm
-                        else return 4; // return PC + 4
+                        if(p_opA == p_opB) // return PC + imm
+                            return p_opA + p_opB;
+                        else               // return PC + 4
+                            return p_opA + 4; 
 
                     case 0010:
                     case 0011: // bne
-                        if(p_DecodeOutput.rs1 != p_DecodeOutput.rs2); // return PC + imm
-                        else return 4; // return PC + 4
+                        if(p_opA != p_opB) // return PC + imm
+                            return p_opA + p_opB;
+                        else               // return PC + 4
+                            return p_opA + 4; 
 
                     case 1000:
                     case 1001: // blt
-                        if(static_cast<int32_t>(p_DecodeOutput.rs1) < static_cast<int32_t>(p_DecodeOutput.rs2)); // return PC + imm
-                        else return 4; // return PC + 4
+                        if(static_cast<int32_t>(p_opA) < static_cast<int32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                          // return PC + 4
+                            return p_opA + 4; 
 
                     case 1010:
                     case 1011: // bge
-                        if(static_cast<int32_t>(p_DecodeOutput.rs1) >= static_cast<int32_t>(p_DecodeOutput.rs2)); // return PC + imm
-                        else return 4; // return PC + 4
-
+                        if(static_cast<int32_t>(p_opA) >= static_cast<int32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                           // return PC + 4
+                            return p_opA + 4; 
                     case 1100:
                     case 1101: // bltu
-                        if(static_cast<uint32_t>(p_DecodeOutput.rs1) < static_cast<uint32_t>(p_DecodeOutput.rs2)); // return PC + imm
-                        else return 4; // return PC + 4
+                        if(static_cast<uint32_t>(p_opA) < static_cast<uint32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                            // return PC + 4
+                            return p_opA + 4; 
 
                     case 1110:
                     case 1111: // bgeu
-                        if(static_cast<uint32_t>(p_DecodeOutput.rs1) >= static_cast<uint32_t>(p_DecodeOutput.rs2)); // return PC + imm
-                        else return 4; // return PC + 4
+                        if(static_cast<uint32_t>(p_opA) >= static_cast<uint32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                             // return PC + 4
+                            return p_opA + 4; 
                 }
             case 0b010:{ // R-type
-                switch (aluControl.to_ulong()){
+                switch (p_aluOp){
                     case 0b0000: // ADD
                         bool carryOut = false; // Carry Flag
-                        return Adder(p_DecodeOutput.rs1, p_DecodeOutput.rs2, false, carryOut);
+                        return Adder(p_opA, p_opB, false, carryOut);
 
                     case 0b0001: // SUB
                         bool carryOut = false; // Carry Flag
-                        uint32_t complement = ~static_cast<uint32_t>(p_DecodeOutput.rs2);
-                        return Adder(p_DecodeOutput.rs1, complement, true, carryOut);
+                        uint32_t complement = ~static_cast<uint32_t>(p_opB);
+                        return Adder(p_opA, complement, true, carryOut);
                         
                     case 0b0010: // SLL
-                        return p_DecodeOutput.rs1 << (p_DecodeOutput.rs2 & 0x1F);
+                        return p_opA << (p_opB & 0x1F);
                 
                     case 0b0100: // SLT
-                        return (p_DecodeOutput.rs1 < p_DecodeOutput.rs2) ? 1 : 0;
+                        return (p_opA < p_opB) ? 1 : 0;
 
                     case 0b0110: // SLTU
-                        return (static_cast<uint32_t>(p_DecodeOutput.rs1) < static_cast<uint32_t>(p_DecodeOutput.rs2)) ? 1 : 0;
+                        return (static_cast<uint32_t>(p_opA) < static_cast<uint32_t>(p_opB)) ? 1 : 0;
                     
                     case 0b1000: // XOR
-                        return p_DecodeOutput.rs1 ^ p_DecodeOutput.rs2;
+                        return p_opA ^ p_opB;
 
                     case 0b1010:  // SRL
-                        return static_cast<uint32_t>(p_DecodeOutput.rs1) >> (p_DecodeOutput.rs2 & 0x1F);
+                        return static_cast<uint32_t>(p_opA) >> (p_opB & 0x1F);
 
                     case 0b1011: // SRA
-                        return p_DecodeOutput.rs1 >> (p_DecodeOutput.rs2 & 0x1F);
+                        return p_opA >> (p_opB & 0x1F);
 
                     case 0b1100: // OR
-                        return p_DecodeOutput.rs1 | p_DecodeOutput.rs2;
+                        return p_opA | p_opB;
 
                     case 0b1110: // AND
-                        return p_DecodeOutput.rs1 & p_DecodeOutput.rs2;
+                        return p_opA & p_opB;
                     
                     default:
-                        std::cerr << "Invaild [funct3]: " << (aluControl.to_ulong() >> 1) << " !" << std::endl;
+                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
                         return 0;
                 }
             }
             case 0b011:{ // I-type
-                switch (aluControl.to_ulong()){
+                switch (p_aluOp){
                     case 0b0001:
                     case 0b0000: // ADDI
                         bool carryOut = false; // Carry Flag
-                        return Adder(p_DecodeOutput.rs1, p_DecodeOutput.rs2, false, carryOut);
+                        return Adder(p_opA, p_opB, false, carryOut);
                         
                     case 0b0010: // SLLI
-                        return p_DecodeOutput.rs1 << (p_DecodeOutput.rs2 & 0x1F);
+                        return p_opA << (p_opB & 0x1F);
                     
                     case 0b0101:
                     case 0b0100: // SLTI
-                        return (p_DecodeOutput.rs1 < p_DecodeOutput.rs2) ? 1 : 0;
-
+                        return (p_opA < p_opB) ? 1 : 0;
                     case 0b0111:
                     case 0b0110: // SLTIU
-                        return (static_cast<uint32_t>(p_DecodeOutput.rs1) < static_cast<uint32_t>(p_DecodeOutput.rs2)) ? 1 : 0;
+                        return (static_cast<uint32_t>(p_opA) < static_cast<uint32_t>(p_opB)) ? 1 : 0;
                     
                     case 0b1001:
                     case 0b1000: // XORI
-                        return p_DecodeOutput.rs1 ^ p_DecodeOutput.rs2;
-
+                        return p_opA ^ p_opB;
                     case 0b1010:  // SRLI
-                        return static_cast<uint32_t>(p_DecodeOutput.rs1) >> (p_DecodeOutput.rs2 & 0x1F);
+                        return static_cast<uint32_t>(p_opA) >> (p_opB & 0x1F);
 
                     case 0b1011: // SRAI
-                        return p_DecodeOutput.rs1 >> (p_DecodeOutput.rs2 & 0x1F);
+                        return p_opA >> (p_opB & 0x1F);
 
                     case 0b1101:
                     case 0b1100: // ORI
-                        return p_DecodeOutput.rs1 | p_DecodeOutput.rs2;
-
+                        return p_opA | p_opB;
                     case 0b1111:
                     case 0b1110: // ANDI
-                        return p_DecodeOutput.rs1 & p_DecodeOutput.rs2;
+                        return p_opA & p_opB;
                     
                     default:
-                        std::cerr << "Invaild [funct3]: " << (aluControl.to_ulong() >> 1) << " !" << std::endl;
+                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
                         return 0;
                 }
             }
