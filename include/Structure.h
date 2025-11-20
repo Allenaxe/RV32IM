@@ -23,16 +23,16 @@ namespace RV32IM {
 
     struct Printer {
         void operator() (const DecodeOutput& out) const {
-            std::cout << "-----------------------------\n";
+            std::cout << "-------------------------------------------\n";
             std::cout << "[DECODE]\n";
-            std::cout << "-----------------------------\n";
+            std::cout << "-------------------------------------------\n";
             std::cout << "rs1     : " << out.rs1 << '\n';
             std::cout << "rs2     : " << out.rs2 << '\n';
             std::cout << "rd      : " << out.rd << '\n';
             std::cout << "funct3  : " << out.funct3 << '\n';
             std::cout << "funct7  : " << out.funct7 << '\n';
             std::cout << "imm     : " << std::bitset<32>(out.imm) << "\n";
-            std::cout << "-----------------------------\n";
+            std::cout << "-------------------------------------------\n";
         }
 
         // void operator()(const ExecuteOutput& out) const {
