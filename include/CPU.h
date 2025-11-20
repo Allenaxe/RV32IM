@@ -6,45 +6,64 @@
 #include <bitset>
 #include <vector>
 #include <variant>
-#include "Memory.h"
+
+#include "PipelineRegister.h"
 #include "Component.h"
 #include "Structure.h"
+#include "Utility.h"
+#include "Memory.h"
 
 namespace RV32IM {
-
-    using Output = std::variant<DecodeOutput/*, ExecuteOutput, MemoryOutput, WritebackOutput*/>;
 
     class CPU {
         // public:
         //     const byte c_ReservedAddress;   const byte c_BaseAddress;   const byte c_AddressCeiling;
 
         private:
-            uint32_t PC;                            // ProgramCounter
-            uint32_t MAR;                           // MemoryAddressRegister
-            uint32_t MDR;                           // MemoryDataRegister
-            uint32_t IR;                            // InstructionRegister
+            // ---------------------------------------------
+            // Register
+            // ---------------------------------------------
+            uint32_t PC;                            // Program Counter
+            uint32_t MAR;                           // Memory Address Register
+            uint32_t MDR;                           // Memory Data Register
+            uint32_t IR;                            // Instruction Register
+
+            PipelineRegister<IF_ID_Data>  IF_ID;
+            PipelineRegister<ID_EX_Data>  ID_EX;
+            PipelineRegister<EX_MEM_Data> EX_MEM;
+            PipelineRegister<MEM_WB_Data> MEM_WB;
+            
+            RegisterFile* RF;
 
             // bool m_OverflowError;
             // bool m_UnderflowError;
             // bool m_SignedMode;
             // bool m_Halt;
 
-            std::vector<Output> Trace;
+            // ---------------------------------------------
+            // Main Memory
+            // ---------------------------------------------
+            MainMemory* TheMemory;
 
-            RegisterFile* RF;
-
-            Memory* TheMemory;
+            // ---------------------------------------------
+            // Stage
+            // ---------------------------------------------
             void Fetch();
-            DecodeOutput Decode();
+            ID_EX_Data Decode(IF_ID_Data& p_DecodeInput);
+            EX_MEM_Data Execute(ID_EX_Data& p_ExecuteInput);
+            MEM_WB_Data Memory(EX_MEM_Data& p_MemoryInput);
+            void WriteBack(MEM_WB_Data& p_WriteBackInput);
 
-            // void Print(Instruction &instr, uint32_t imm);
+            // ---------------------------------------------
+            // Utility
+            // ---------------------------------------------
+            Utility* Record;
 
         public:
-            CPU(Memory* p_TheMemory);
+            CPU(MainMemory* p_TheMemory);
             // ~CPU();
             // void Reset();
-            void Execute();
-            void Print();
+            void Run();
     };
 }
 #endif
