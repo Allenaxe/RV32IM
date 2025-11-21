@@ -43,7 +43,6 @@
         "numbers": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
-        "typeinfo": "cpp",
-        "variant": "cpp"
+        "typeinfo": "cpp"
     }
 }
