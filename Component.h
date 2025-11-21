@@ -3,8 +3,10 @@
 #include <cstdint>
 #include <bitset>
 #include <tuple>
+#include <memory>
 
 #include "Structure.h"
+#include "Memory.h"
 
 #define NUMBER_REGISTER 32
 

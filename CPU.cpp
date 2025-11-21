@@ -1,10 +1,11 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(Memory* p_TheMemory): RF(new RegisterFile()), TheMemory(p_TheMemory) {}
+    CPU::CPU(std::shared_ptr<Segmentation> p_ProgSeg): RF(new RegisterFile()), ProgSeg(p_ProgSeg) {}
+    
     void CPU::Fetch() {
         MAR = PC;
-        MDR = TheMemory->Read(MDR);
+        MDR = ProgSeg->Read(MDR);
         IR = MDR;
         PC += 1;
     }

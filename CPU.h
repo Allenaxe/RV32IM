@@ -22,18 +22,17 @@ namespace RV32IM {
             // bool m_OverflowError;
             // bool m_UnderflowError;
             // bool m_SignedMode;
-            // bool m_Halt;
+            // bool m_Halt;  
 
-            RegisterFile* RF;
-
-            Memory* TheMemory;
+            RegisterFile* RF;            
+            std::shared_ptr<Segmentation> ProgSeg;                // Program Segmentation
             void Fetch();
             DecodeOutput Decode(uint32_t wd);
 
             // void Print(Instruction &instr, uint32_t imm);
 
         public:
-            CPU(Memory* p_TheMemory);
+            CPU(std::shared_ptr<Segmentation> p_ProgSeg);
             // ~CPU();
             // void Reset();
             void Execute();

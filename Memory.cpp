@@ -1,25 +1,38 @@
 #include "Memory.h"
 
 namespace RV32IM {
-    Memory::Memory(): c_MaxAddress(255), m_MemorySpace(new uint32_t[c_MaxAddress]) {}
-        uint32_t Memory::Read(uint32_t p_Address) {
-        return m_MemorySpace[p_Address];
+    std::vector<uint32_t> Memory::Storage;
+
+    Memory::Memory() {
+        const size_t SIZE = (PHY_HIGH_ADDR - PHY_LOW_ADDR) / sizeof(uint32_t);
+        Storage.resize(SIZE, 0);
     }
 
-    Memory::~Memory() {
-        if( m_MemorySpace != nullptr ) {
-            delete[] m_MemorySpace;
-            m_MemorySpace = nullptr;
+    Memory::~Memory () {}
+
+    void Memory::Clear () {
+        for (size_t i = PHY_LOW_ADDR; i < PHY_HIGH_ADDR; ++i) {
+            Storage[i] = 0;
         }
     }
 
-    void Memory::Write(const uint32_t& p_Address, const uint32_t& p_Value) {
-        m_MemorySpace[p_Address] = p_Value;
+    Segmentation::Segmentation (uint32_t p_startAddr, uint32_t p_endAddr, uint32_t p_textLength)
+        : START_ADDR(p_startAddr), DATA_ADDR(p_startAddr + p_textLength),
+          BSS_ADDR(p_startAddr + 0x0000'0150), HEAP_ADDR(p_startAddr + 0x0000'0200),
+          END_ADDR(p_endAddr) {}
+
+    // Helper function: translate address format to array offset
+    uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
+        return (p_Address - START_ADDR) / sizeof(uint32_t);
+    }
+
+    uint32_t Segmentation::Read (uint32_t p_Address) {
+        uint32_t ArrayOffset = AddrTranslate(p_Address);
+        return Storage[ArrayOffset];
+    }
+
+    void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value) {
+        uint32_t ArrayOffset = AddrTranslate(p_Address);
+        Storage[ArrayOffset] = p_Value;
     };
-
-    void Memory::Clear() {
-        for (byte i = 0; i < c_MaxAddress; ++i) {
-            m_MemorySpace[i] = 0;
-        }
-    }
 }
