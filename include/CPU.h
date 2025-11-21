@@ -10,7 +10,7 @@
 #include "PipelineRegister.h"
 #include "Component.h"
 #include "Structure.h"
-#include "Utility.h"
+#include "Printer.h"
 #include "Memory.h"
 
 namespace RV32IM {
@@ -57,10 +57,10 @@ namespace RV32IM {
             // ---------------------------------------------
             // Utility
             // ---------------------------------------------
-            Utility* Record;
+            Printer* Record;
 
         public:
-            CPU(MainMemory* p_TheMemory);
+            CPU(MainMemory* p_TheMemory, std::string Filename, bool ConsoleOutput);
             // ~CPU();
             // void Reset();
             void Run();
