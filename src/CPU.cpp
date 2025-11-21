@@ -48,11 +48,28 @@ namespace RV32IM {
             if (cycle == 6) break;
 
             // ---------------------------------------------
-            // Write-Back (WB) Stage
+            // Fetch (IF) Stage
             // ---------------------------------------------
-            MEM_WB_Data writeback_input = MEM_WB.Read();
-            WB_Data writeback_output = WriteBack(writeback_input);
-            Record->RecordState(writeback_output);
+            Fetch();
+            IF_ID_Data fetch_output {PC, IR};
+            Record->RecordState(fetch_output);
+            IF_ID.Write(fetch_output);
+
+            // ---------------------------------------------
+            // Decode (ID) Stage
+            // ---------------------------------------------
+            IF_ID_Data decode_input = IF_ID.Read();
+            ID_EX_Data decode_output = Decode(decode_input);
+            Record->RecordState(decode_output);
+            ID_EX.Write(decode_output);
+
+            // ---------------------------------------------
+            // Execute (EX) Stage
+            // ---------------------------------------------
+            ID_EX_Data execute_input = ID_EX.Read();
+            EX_MEM_Data execute_output = Execute(execute_input);
+            Record->RecordState(execute_output);
+            EX_MEM.Write(execute_output);
 
             // ---------------------------------------------
             // Memory (MEM) Stage
@@ -63,28 +80,11 @@ namespace RV32IM {
             MEM_WB.Write(memory_output);
 
             // ---------------------------------------------
-            // Execute (EX) Stage
+            // Write-Back (WB) Stage
             // ---------------------------------------------
-            ID_EX_Data execute_input = ID_EX.Read();
-            EX_MEM_Data execute_output = Execute(execute_input);
-            Record->RecordState(execute_output);
-            EX_MEM.Write(execute_output);
-            
-            // ---------------------------------------------
-            // Decode (ID) Stage
-            // ---------------------------------------------
-            IF_ID_Data decode_input = IF_ID.Read();
-            ID_EX_Data decode_output = Decode(decode_input);
-            Record->RecordState(decode_output);
-            ID_EX.Write(decode_output);
-            
-            // ---------------------------------------------
-            // Fetch (IF) Stage
-            // ---------------------------------------------
-            Fetch();
-            IF_ID_Data fetch_output {PC, IR};
-            Record->RecordState(fetch_output);
-            IF_ID.Write(fetch_output);
+            MEM_WB_Data writeback_input = MEM_WB.Read();
+            WB_Data writeback_output = WriteBack(writeback_input);
+            Record->RecordState(writeback_output);
 
             IF_ID.Update();
             ID_EX.Update();
