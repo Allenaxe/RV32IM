@@ -4,11 +4,16 @@
 #include <iostream>
 #include <cstdint>
 #include <bitset>
+#include <vector>
+#include <variant>
 #include "Memory.h"
 #include "Component.h"
 #include "Structure.h"
 
 namespace RV32IM {
+
+    using Output = std::variant<DecodeOutput/*, ExecuteOutput, MemoryOutput, WritebackOutput*/>;
+
     class CPU {
         // public:
         //     const byte c_ReservedAddress;   const byte c_BaseAddress;   const byte c_AddressCeiling;
@@ -24,11 +29,13 @@ namespace RV32IM {
             // bool m_SignedMode;
             // bool m_Halt;
 
+            std::vector<Output> Trace;
+
             RegisterFile* RF;
 
             Memory* TheMemory;
             void Fetch();
-            DecodeOutput Decode(uint32_t wd);
+            DecodeOutput Decode();
 
             // void Print(Instruction &instr, uint32_t imm);
 
@@ -37,6 +44,7 @@ namespace RV32IM {
             // ~CPU();
             // void Reset();
             void Execute();
+            void Print();
     };
 }
 #endif
