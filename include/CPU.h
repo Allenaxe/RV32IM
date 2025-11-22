@@ -4,8 +4,6 @@
 #include <iostream>
 #include <cstdint>
 #include <bitset>
-#include <vector>
-#include <variant>
 
 #include "PipelineRegister.h"
 #include "Component.h"
@@ -14,7 +12,6 @@
 #include "Memory.h"
 
 namespace RV32IM {
-
     class CPU {
         // public:
         //     const byte c_ReservedAddress;   const byte c_BaseAddress;   const byte c_AddressCeiling;
@@ -38,12 +35,12 @@ namespace RV32IM {
             // bool m_OverflowError;
             // bool m_UnderflowError;
             // bool m_SignedMode;
-            // bool m_Halt;
+            // bool m_Halt;  
 
             // ---------------------------------------------
             // Main Memory
             // ---------------------------------------------
-            MainMemory* TheMemory;
+            std::unique_ptr<Segmentation>& ProgSeg;                // Program Segmentation
 
             // ---------------------------------------------
             // Stage
@@ -60,7 +57,7 @@ namespace RV32IM {
             Printer* Record;
 
         public:
-            CPU(MainMemory* p_TheMemory, std::string Filename, bool ConsoleOutput);
+            CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput);
             // ~CPU();
             // void Reset();
             void Run();

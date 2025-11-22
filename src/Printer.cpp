@@ -89,7 +89,7 @@ namespace RV32IM {
         os << "[FETCH]\n";
         os << "-------------------------------------------------\n";
         os << "Program Counter: " << out.pc << '\n';
-        os << "Instruction    : " << out.inst << '\n';
+        os << "Instruction    : " << std::bitset<32> {out.inst} << '\n';
         os << "-------------------------------------------------\n";
     }
 
