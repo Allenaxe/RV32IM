@@ -32,7 +32,20 @@ namespace RV32IM {
     }
 
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
-        return EX_MEM_Data {};
+        int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.control_signal[4] | p_ExecuteInput.control_signal[5]));
+        int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.control_signal[8]);
+        uint32_t aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
+        int32_t control_signal = p_ExecuteInput.control_signal.to_ulong() & 0b111;
+        int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
+
+
+        // std::cout << "Immediate: " << decode_output.imm << '\n';
+        // std::cout << "rs1: " << decode_output.rs1 << '\n';
+        // std::cout << "rs2: " << decode_output.rs2 << '\n';
+        // std::cout << "Control Signal: " << decode_output.control_signal << '\n';
+        // std::cout << "ALU Output: " << alu_output << std::endl;
+        
+        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd};
     }
 
     MEM_WB_Data CPU::Memory(EX_MEM_Data& p_MemoryInput) {
