@@ -1,16 +1,16 @@
 #include "Component.h"
 
 namespace RV32IM {
-    RegisterFileRead RegisterFile::read(uint8_t rs1, uint8_t rs2) {
+    RegisterFileRead RegisterFile::Read(uint8_t rs1, uint8_t rs2) {
         return RegisterFileRead {Register[rs1], Register[rs2]};
     }
 
-    void RegisterFile::write(uint8_t rd, uint32_t wd, bool we) {
+    void RegisterFile::Write(uint8_t rd, uint32_t wd, bool we) {
         if (rd != 0 && we == 1)
             Register[rd] = wd;
     }
 
-    std::bitset <10> ControlUnit::control_signal(std::bitset<7> &p_Opcode) {
+    std::bitset <10> ControlUnit::ControlSignal(std::bitset<7> &p_Opcode) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
@@ -48,7 +48,7 @@ namespace RV32IM {
         return std::bitset <10> {control_signal};
     }
 
-    uint32_t ImmediateGenerator::decodetype(std::bitset<7> p_Opcode) {
+    uint32_t ImmediateGenerator::DecodeType(std::bitset<7> p_Opcode) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
@@ -72,39 +72,39 @@ namespace RV32IM {
             (isAUIPC        ) ;
     };
 
-    int32_t ImmediateGenerator::extend(uint32_t p_Immediate, uint32_t p_Extend) {
+    int32_t ImmediateGenerator::Extend(uint32_t p_Immediate, uint32_t p_Extend) {
         int32_t mask = 1 << (p_Extend - 1);
         return (p_Immediate ^ mask) - mask;
     };
 
-    int32_t ImmediateGenerator::generate(uint32_t &p_Instr) {
+    int32_t ImmediateGenerator::Generate(uint32_t &p_Instr) {
 
         std::bitset<7> opcode {p_Instr & 0x0000'007F}; 
 
-        uint32_t InstrctionType = decodetype(opcode);
+        uint32_t InstrctionType = DecodeType(opcode);
         
         switch(InstrctionType) {
             case (1 << 7):          // I Type
-                return extend (p_Instr >> 20, 12);
+                return Extend (p_Instr >> 20, 12);
 
             case (1 << 6):          // S Type
-                return extend (((p_Instr >> 25) << 5) | ((p_Instr >> 7) & 0x1F), 12);
+                return Extend (((p_Instr >> 25) << 5) | ((p_Instr >> 7) & 0x1F), 12);
             
             case (1 << 5):          // B Type
-                return extend (((p_Instr >> 31) << 12) | (((p_Instr >> 7) & 0x01) << 11)
+                return Extend (((p_Instr >> 31) << 12) | (((p_Instr >> 7) & 0x01) << 11)
                     | (((p_Instr >> 25) & 0x3F) << 5)
                     | (((p_Instr >> 8) & 0x0F) << 1),
                     11);
 
             case (1 << 4):          // J Type
-                return extend (((p_Instr >> 31) << 20) | (((p_Instr >> 12) & 0xFF) << 12)
+                return Extend (((p_Instr >> 31) << 20) | (((p_Instr >> 12) & 0xFF) << 12)
                     | (((p_Instr >> 20) & 0x01) << 11)
                     | (((p_Instr >> 25) & 0x3F) << 5)
                     | (((p_Instr >> 21) & 0x0F) << 1),
                     12);
             
             case (1 << 3):          // LOAD
-                return extend (p_Instr >> 20, 12);
+                return Extend (p_Instr >> 20, 12);
 
             case (1 << 1):          // LUI
                 return (p_Instr & (((1 << 20) - 1) << 12));

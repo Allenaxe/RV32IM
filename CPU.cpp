@@ -1,10 +1,11 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(Memory* p_TheMemory): RF(new RegisterFile()), TheMemory(p_TheMemory) {}
+    CPU::CPU(std::shared_ptr<Segmentation> p_ProgSeg): RF(new RegisterFile()), ProgSeg(p_ProgSeg) {}
+    
     void CPU::Fetch() {
         MAR = PC;
-        MDR = TheMemory->Read(MDR);
+        MDR = ProgSeg->Read(MDR);
         IR = MDR;
         PC += 1;
     }
@@ -18,17 +19,17 @@ namespace RV32IM {
         // instr.rs2 = (IR & 0x01F0'0000) >> 20;       // IR[24:20]
         // instr.funct7 = (IR & 0xFE00'0000) >> 25;    // IR[31:25]
 
-        int32_t imm = ImmediateGenerator::generate(IR);
+        int32_t imm = ImmediateGenerator::Generate(IR);
         std::bitset<7> opcode {IR & 0x0000'007F};
-        std::bitset<10> control_signal = ControlUnit::control_signal(opcode);
+        std::bitset<10> control_signal = ControlUnit::ControlSignal(opcode);
         uint8_t rs1 = (IR & 0x000F'8000) >> 15;
         uint8_t rs2 = (IR & 0x01F0'0000) >> 20;
         uint8_t rd = (IR & 0x0000'0F80) >> 7;
         std::bitset <3> funct3 = (IR & 0x0000'7000) >> 12;
         std::bitset <1> funct7 = (IR & 0x4000'0000) >> 30;
 
-        RF->write(rd, wd, control_signal[9]);
-        RegisterFileRead RF_read = RF->read(rs1, rs2);
+        RF->Write(rd, wd, control_signal[9]);
+        RegisterFileRead RF_read = RF->Read(rs1, rs2);
 
         return DecodeOutput {imm, RF_read.rs1, RF_read.rs2, funct3, funct7, control_signal};
     }
