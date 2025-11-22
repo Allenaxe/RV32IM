@@ -9,7 +9,7 @@
 namespace RV32IM {
     typedef unsigned char byte;
 
-    class Memory {
+    class MainMemory {
         private:
             const uint32_t PHY_LOW_ADDR = 0x0000'0000;
             const uint32_t PHY_HIGH_ADDR = 0x0000'5000;
@@ -18,14 +18,14 @@ namespace RV32IM {
             static std::vector<uint32_t> Storage;           // shared memory
 
         public:
-            Memory ();
-            ~Memory ();
+            MainMemory ();
+            ~MainMemory ();
             void Clear ();
 
             friend class Segmentation;
     };
 
-    class Segmentation : public Memory {
+    class Segmentation : public MainMemory {
         private:
             uint32_t AddrTranslate (const uint32_t p_Address);      // helper function
 

@@ -1,23 +1,54 @@
-CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -O2
+# ==========================
+#   CPU Pipeline Simulator
+# ==========================
 
-TARGET := cpu_simulator
+CXX       := g++
+CXXFLAGS  := -std=c++17 -Wall -Wextra -O2 -Iinclude -MMD -MP
 
-SRCS := $(wildcard *.cpp)
+# Project structure
+TARGET    := cpu_simulator
+SRC_DIR   := src
+INC_DIR   := include
+BUILD_DIR := build
 
-OBJS := $(SRCS:.cpp=.o)
+# Find all .cpp files
+SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 
+# Convert src/*.cpp → build/*.o
+OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+
+# Dependency files build/*.d
+DEPS := $(OBJS:.o=.d)
+
+# ==========================
+#     Build target
+# ==========================
 all: $(TARGET)
 
+# Linking
 $(TARGET): $(OBJS)
 	$(CXX) $(CXXFLAGS) -o $@ $^
 
-%.o: %.cpp %.h
+# Compiling rule
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
+# Create build directory if missing
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
+
+# ==========================
+#       Utilities
+# ==========================
 clean:
-	rm -f $(OBJS) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET)
 
 rebuild: clean all
 
-.PHONY: all clean rebuild
+run: $(TARGET)
+	./$(TARGET)
+
+# Include dependencies
+-include $(DEPS)
+
+.PHONY: all clean rebuild run

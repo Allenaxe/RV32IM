@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <bitset>
 #include <tuple>
-#include <iostream>
 #include <memory>
 
 #include "Structure.h"
@@ -42,10 +41,10 @@ namespace RV32IM {
 
     class ImmediateGenerator {
         public:
-			static int32_t Generate(uint32_t &p_Instr);
+			static uint32_t Generate(uint32_t &p_Instr);
 		private:
 			static uint32_t DecodeType(std::bitset<7> p_Opcode);
-			static int32_t Extend(uint32_t p_Immediate, uint32_t p_Extend);
+			static uint32_t Extend(uint32_t p_Immediate, uint32_t p_Extend);
     };
 	
 	class ALU {

@@ -43,6 +43,17 @@
         "numbers": "cpp",
         "stdexcept": "cpp",
         "streambuf": "cpp",
+<<<<<<< HEAD
+        "typeinfo": "cpp",
+        "variant": "cpp",
+        "ctime": "cpp",
+        "map": "cpp",
+        "optional": "cpp",
+        "iomanip": "cpp",
+        "sstream": "cpp",
+        "fstream": "cpp"
+=======
         "typeinfo": "cpp"
+>>>>>>> main
     }
 }

@@ -1,16 +1,16 @@
 #include "Memory.h"
 
 namespace RV32IM {
-    std::vector<uint32_t> Memory::Storage;
+    std::vector<uint32_t> MainMemory::Storage;
 
-    Memory::Memory() {
+    MainMemory::MainMemory() {
         const size_t SIZE = (PHY_HIGH_ADDR - PHY_LOW_ADDR) / sizeof(uint32_t);
         Storage.resize(SIZE, 0);
     }
 
-    Memory::~Memory () {}
+    MainMemory::~MainMemory () {}
 
-    void Memory::Clear () {
+    void MainMemory::Clear () {
         for (size_t i = PHY_LOW_ADDR; i < PHY_HIGH_ADDR; ++i) {
             Storage[i] = 0;
         }
