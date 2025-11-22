@@ -10,7 +10,7 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
-    std::bitset<10> ControlUnit::ControlSignal(std::bitset<7> &p_Opcode) {
+    std::bitset <10> ControlUnit::ControlSignal(std::bitset<7> &p_Opcode) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];

@@ -1,12 +1,18 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(MainMemory* p_TheMemory, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), TheMemory(p_TheMemory), Record(new Printer(Filename, ConsoleOutput)) {}
+    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), ProgSeg(p_ProgSeg), Record(new Printer(Filename, ConsoleOutput)) {
+        PC = ProgSeg->START_ADDR;
+        IF_ID = {};
+        ID_EX = {};
+        EX_MEM = {};
+        MEM_WB = {};
+    }
     void CPU::Fetch() {
         MAR = PC;
-        MDR = TheMemory->Read(MAR);
+        MDR = ProgSeg->Read(MAR);
         IR = MDR;
-        PC += 1;
+        PC += 4;
     }
 
     ID_EX_Data CPU::Decode(IF_ID_Data& p_DecodeInput) { 
