@@ -116,4 +116,175 @@ namespace RV32IM {
                 return 0;
         }
     }
+
+    int32_t ALU::Adder(uint32_t src1, uint32_t src2, bool cin, bool &carry) {
+        uint32_t result = 0;
+        bool carry_local = cin;
+
+        for(int i = 0; i < 32; i++){
+            bool bit1 = (src1 >> i) & 1;
+            bool bit2 = (src2 >> i) & 1;
+            bool sum, carryOut;
+
+            sum = bit1 ^ bit2 ^ carry_local;
+            carryOut = (bit1 & bit2) | (bit1 & carry_local) | (bit2 & carry_local);
+            if(sum) {
+                result |= (1u << i);
+            }
+            carry_local = carryOut;
+        }
+
+        carry = carry_local;
+        return (int32_t)result;
+    }
+
+    uint32_t ALU::AluControl(uint8_t p_funct3, int8_t p_funct7){
+        // return funct3(3bit)+funct7(1bit)
+        // determine calculate type
+        std::bitset<4> type = p_funct3;
+        type <<= 1;
+        type[0] = p_funct7;
+        return type.to_ulong();
+    }
+
+    int32_t ALU::OpA(uint32_t PC, uint32_t src1, bool p_Selector) {
+        // signal: Branch / Jump = 1
+        return p_Selector ? static_cast<int32_t>(PC): static_cast<int32_t>(src1);
+    }
+
+    int32_t ALU::OpB(uint32_t src2, int32_t imm, bool p_Selector) {
+        // signal: ALUsrc = 1
+        return p_Selector ? static_cast<int32_t>(imm) : static_cast<int32_t>(src2);
+    }
+
+    // int32_t ALU::Operate(DecodeOutput p_DecodeOutput)
+    int32_t ALU::Operate(uint32_t p_aluOp, int32_t control_signal, int32_t p_opA, int32_t p_opB) {
+        switch ((control_signal)){
+            case 0b000: // Load / Store
+                return p_opA + p_opB;
+
+            case 0b001: // Branch
+                // return PC + imm
+                switch (p_aluOp){
+                    case 0000:
+                    case 0001: // beq
+                        if(p_opA == p_opB) // return PC + imm
+                            return p_opA + p_opB;
+                        else               // return PC + 4
+                            return p_opA + 4; 
+
+                    case 0010:
+                    case 0011: // bne
+                        if(p_opA != p_opB) // return PC + imm
+                            return p_opA + p_opB;
+                        else               // return PC + 4
+                            return p_opA + 4; 
+
+                    case 1000:
+                    case 1001: // blt
+                        if(static_cast<int32_t>(p_opA) < static_cast<int32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                          // return PC + 4
+                            return p_opA + 4; 
+
+                    case 1010:
+                    case 1011: // bge
+                        if(static_cast<int32_t>(p_opA) >= static_cast<int32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                           // return PC + 4
+                            return p_opA + 4; 
+                    case 1100:
+                    case 1101: // bltu
+                        if(static_cast<uint32_t>(p_opA) < static_cast<uint32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                            // return PC + 4
+                            return p_opA + 4; 
+
+                    case 1110:
+                    case 1111: // bgeu
+                        if(static_cast<uint32_t>(p_opA) >= static_cast<uint32_t>(p_opB)) // return PC + imm
+                            return p_opA + p_opB;
+                        else                                                             // return PC + 4
+                            return p_opA + 4; 
+                }
+            case 0b010:{ // R-type
+                switch (p_aluOp){
+                    case 0b0000: // ADD
+                        bool carryOut = false; // Carry Flag
+                        return Adder(p_opA, p_opB, false, carryOut);
+
+                    case 0b0001: // SUB
+                        bool carryOut = false; // Carry Flag
+                        uint32_t complement = ~static_cast<uint32_t>(p_opB);
+                        return Adder(p_opA, complement, true, carryOut);
+                        
+                    case 0b0010: // SLL
+                        return p_opA << (p_opB & 0x1F);
+                
+                    case 0b0100: // SLT
+                        return (p_opA < p_opB) ? 1 : 0;
+
+                    case 0b0110: // SLTU
+                        return (static_cast<uint32_t>(p_opA) < static_cast<uint32_t>(p_opB)) ? 1 : 0;
+                    
+                    case 0b1000: // XOR
+                        return p_opA ^ p_opB;
+
+                    case 0b1010:  // SRL
+                        return static_cast<uint32_t>(p_opA) >> (p_opB & 0x1F);
+
+                    case 0b1011: // SRA
+                        return p_opA >> (p_opB & 0x1F);
+
+                    case 0b1100: // OR
+                        return p_opA | p_opB;
+
+                    case 0b1110: // AND
+                        return p_opA & p_opB;
+                    
+                    default:
+                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
+                        return 0;
+                }
+            }
+            case 0b011:{ // I-type
+                switch (p_aluOp){
+                    case 0b0001:
+                    case 0b0000: // ADDI
+                        bool carryOut = false; // Carry Flag
+                        return Adder(p_opA, p_opB, false, carryOut);
+                        
+                    case 0b0010: // SLLI
+                        return p_opA << (p_opB & 0x1F);
+                    
+                    case 0b0101:
+                    case 0b0100: // SLTI
+                        return (p_opA < p_opB) ? 1 : 0;
+                    case 0b0111:
+                    case 0b0110: // SLTIU
+                        return (static_cast<uint32_t>(p_opA) < static_cast<uint32_t>(p_opB)) ? 1 : 0;
+                    
+                    case 0b1001:
+                    case 0b1000: // XORI
+                        return p_opA ^ p_opB;
+                    case 0b1010:  // SRLI
+                        return static_cast<uint32_t>(p_opA) >> (p_opB & 0x1F);
+
+                    case 0b1011: // SRAI
+                        return p_opA >> (p_opB & 0x1F);
+
+                    case 0b1101:
+                    case 0b1100: // ORI
+                        return p_opA | p_opB;
+                    case 0b1111:
+                    case 0b1110: // ANDI
+                        return p_opA & p_opB;
+                    
+                    default:
+                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
+                        return 0;
+                }
+            }
+        }
+    }
 }
