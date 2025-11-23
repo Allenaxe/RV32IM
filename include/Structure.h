@@ -6,7 +6,7 @@
 #include <bitset>
 
 namespace RV32IM {
-    
+
     struct RegisterFileRead {
         uint32_t rs1;
         uint32_t rs2;
@@ -74,6 +74,7 @@ namespace RV32IM {
         std::optional<MEM_WB_Data> MEM_data;
         std::optional<WB_Data> WB_data;
     };
+
 }
 
 #endif

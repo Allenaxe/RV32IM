@@ -27,6 +27,7 @@ namespace RV32IM {
                 out = T();
             };
     };
+
 }
 
 #endif

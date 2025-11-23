@@ -7,13 +7,14 @@
 #include <memory>
 
 namespace RV32IM {
+
     typedef unsigned char byte;
 
     class MainMemory {
         private:
             const uint32_t PHY_LOW_ADDR = 0x0000'0000;
             const uint32_t PHY_HIGH_ADDR = 0x0000'5000;
-        
+
         protected:
             static std::vector<uint32_t> Storage;           // shared memory
 
@@ -40,7 +41,7 @@ namespace RV32IM {
             uint32_t Read (const uint32_t p_Address);
             void Write (const uint32_t& p_Address, const uint32_t& p_Value);
     };
-    
+
 }
 
 #endif

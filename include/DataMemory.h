@@ -8,6 +8,7 @@
 #include "Memory.h"
 
 namespace RV32IM {
+
     class DataMemory {
         private:
             std::unique_ptr<Segmentation> seg;      // TODO: should be accept `std::move(p_Seg)` later, where `p_Seg` is a unique_ptr<Segmentation>
@@ -19,6 +20,7 @@ namespace RV32IM {
             uint32_t Load();
             void Store();
     };
+
 }
 
 #endif

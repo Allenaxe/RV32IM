@@ -1,5 +1,6 @@
 #ifndef CPU_COMPONENT
 #define CPU_COMPONENT
+
 #include <cstdint>
 #include <bitset>
 #include <tuple>
@@ -11,6 +12,7 @@
 #define NUMBER_REGISTER 32
 
 namespace RV32IM {
+
 	class ControlUnit {
 		/********************************************************
 		 * - RegWrite ( 1 bit ) : register can write
@@ -46,16 +48,17 @@ namespace RV32IM {
 			static uint32_t DecodeType(std::bitset<7> p_Opcode);
 			static uint32_t Extend(uint32_t p_Immediate, uint32_t p_Extend);
     };
-	
+
 	class ALU {
         public:
 			/********************************************************
 			 * - AluControl ( 4 bits ) - 3 bits funct3 & 1 bit funct7
 			********************************************************/
-			static int32_t Operate(uint32_t p_aluOp, int32_t control_signal, int32_t p_opA, int32_t p_opB);
+			static int32_t Operate(std::bitset<4> p_aluOp, int32_t control_signal, int32_t p_opA, int32_t p_opB);
 			static int32_t OpA(uint32_t PC, uint32_t src1, bool p_Selector);
 			static int32_t OpB(uint32_t src2, int32_t imm, bool p_Selector);
-			static uint32_t AluControl(uint8_t p_funct3, int8_t p_funct7);
+			static std::bitset<4> AluControl (uint32_t p_funct3, uint32_t p_funct7);
+
 		private:
             static int32_t Adder(uint32_t src1, uint32_t src2, bool cin, bool &carry);
     };

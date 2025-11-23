@@ -12,10 +12,8 @@
 #include "Memory.h"
 
 namespace RV32IM {
-    class CPU {
-        // public:
-        //     const byte c_ReservedAddress;   const byte c_BaseAddress;   const byte c_AddressCeiling;
 
+    class CPU {
         private:
             // ---------------------------------------------
             // Register
@@ -29,13 +27,13 @@ namespace RV32IM {
             PipelineRegister<ID_EX_Data>  ID_EX;
             PipelineRegister<EX_MEM_Data> EX_MEM;
             PipelineRegister<MEM_WB_Data> MEM_WB;
-            
+
             RegisterFile* RF;
 
             // bool m_OverflowError;
             // bool m_UnderflowError;
             // bool m_SignedMode;
-            // bool m_Halt;  
+            // bool m_Halt;
 
             // ---------------------------------------------
             // Main Memory
@@ -62,5 +60,6 @@ namespace RV32IM {
             // void Reset();
             void Run();
     };
+
 }
 #endif

@@ -15,7 +15,7 @@ namespace RV32IM {
         PC += 4;
     }
 
-    ID_EX_Data CPU::Decode(IF_ID_Data& p_DecodeInput) { 
+    ID_EX_Data CPU::Decode(IF_ID_Data& p_DecodeInput) {
         std::bitset<7> opcode {p_DecodeInput.inst & 0x0000'007F};            // IR[0:6]
         std::bitset<5> rd {(p_DecodeInput.inst & 0x0000'0F80) >> 7};         // IR[7:11]
         std::bitset<3> funct3 {(p_DecodeInput.inst & 0x0000'7000) >> 12};    // IR[12:14]
@@ -34,7 +34,7 @@ namespace RV32IM {
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
         int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.control_signal[4] | p_ExecuteInput.control_signal[5]));
         int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.control_signal[8]);
-        uint32_t aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
+        std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
         int32_t control_signal = p_ExecuteInput.control_signal.to_ulong() & 0b111;
         int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
 
@@ -44,7 +44,7 @@ namespace RV32IM {
         // std::cout << "rs2: " << decode_output.rs2 << '\n';
         // std::cout << "Control Signal: " << decode_output.control_signal << '\n';
         // std::cout << "ALU Output: " << alu_output << std::endl;
-        
+
         return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd};
     }
 
