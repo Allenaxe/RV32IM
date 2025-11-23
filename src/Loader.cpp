@@ -6,7 +6,7 @@
 namespace RV32IM {
     Loader::Loader() {};
 
-    std::unique_ptr<Segmentation> Loader::Load(std::string p_filename, MainMemory &p_memory){     // load from text file currently
+    std::unique_ptr<Segmentation> Loader::Load (std::string p_filename, MainMemory &p_memory) {     // load from text file currently
         startAddr = BASE_ADDR;              // starting addrees was fixed to 0x0
         std::fstream FileIn(p_filename, std::ios::in);
         std::string strLine;

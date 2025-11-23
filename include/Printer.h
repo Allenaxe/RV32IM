@@ -14,7 +14,7 @@ namespace RV32IM {
             CycleSnapshot CurrentCycleSnapshot;
             std::ofstream LogFile;
             bool ConsoleOutput;
-            
+
         public:
             Printer(const std::string& Filename, bool toConsole);
             ~Printer();
@@ -35,6 +35,7 @@ namespace RV32IM {
 
             void WriteRaw(const std::string& message);
     };
+
 }
 
 #endif

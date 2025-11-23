@@ -15,31 +15,31 @@ namespace RV32IM {
         }
     }
 
-    void Printer::RecordState(const IF_ID_Data& p_Data) {
+    void Printer::RecordState (const IF_ID_Data& p_Data) {
         CurrentCycleSnapshot.IF_data = p_Data;
     }
 
-    void Printer::RecordState(const ID_EX_Data& p_Data) {
+    void Printer::RecordState (const ID_EX_Data& p_Data) {
         CurrentCycleSnapshot.ID_data = p_Data;
     }
 
-    void Printer::RecordState(const EX_MEM_Data& p_Data) {
+    void Printer::RecordState (const EX_MEM_Data& p_Data) {
         CurrentCycleSnapshot.EX_data = p_Data;
     }
 
-    void Printer::RecordState(const MEM_WB_Data& p_Data) {
+    void Printer::RecordState (const MEM_WB_Data& p_Data) {
         CurrentCycleSnapshot.MEM_data = p_Data;
     }
 
-    void Printer::RecordState(const WB_Data& p_Data) {
+    void Printer::RecordState (const WB_Data& p_Data) {
         CurrentCycleSnapshot.WB_data = p_Data;
     }
 
-    void Printer::EndCycle(int cycle_num) {
+    void Printer::EndCycle (int cycle_num) {
         CurrentCycleSnapshot.cycle_number = cycle_num;
         History.push_back(CurrentCycleSnapshot);
-            
-        CurrentCycleSnapshot = CycleSnapshot(); 
+
+        CurrentCycleSnapshot = CycleSnapshot();
     }
 
     void Printer::PrintTrace () {
@@ -48,7 +48,7 @@ namespace RV32IM {
             oss << "=================================================\n";
             oss << " CYCLE " << snap.cycle_number << "\n";
             oss << "=================================================\n";
-            
+
             if (snap.IF_data.has_value()) {
                 PrintState(oss, *snap.IF_data);
             } else {
@@ -78,7 +78,7 @@ namespace RV32IM {
             } else {
                 oss << "[WB] Bubble\n";
             }
-         
+
             oss << "\n";
         }
         WriteRaw(oss.str());
@@ -139,11 +139,11 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
     }
 
-    void Printer::WriteRaw(const std::string& message) {
+    void Printer::WriteRaw (const std::string& message) {
         if (LogFile.is_open()) {
             LogFile << message;
         }
-        
+
         if (ConsoleOutput) {
             std::cout << message;
         }
