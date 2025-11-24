@@ -26,11 +26,13 @@ namespace RV32IM {
         return (p_Address - START_ADDR) / sizeof(uint32_t);
     }
 
+    // TODO: use little endian instead
     uint32_t Segmentation::Read (uint32_t p_Address) {
         uint32_t ArrayOffset = AddrTranslate(p_Address);
         return Storage[ArrayOffset];
     }
 
+    // TODO: use little endian instead
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value) {
         uint32_t ArrayOffset = AddrTranslate(p_Address);
         Storage[ArrayOffset] = p_Value;

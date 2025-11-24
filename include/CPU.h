@@ -10,6 +10,7 @@
 #include "Structure.h"
 #include "Printer.h"
 #include "Memory.h"
+#include "DataMemory.h"
 
 namespace RV32IM {
 
@@ -38,7 +39,7 @@ namespace RV32IM {
             // ---------------------------------------------
             // Main Memory
             // ---------------------------------------------
-            std::unique_ptr<Segmentation>& ProgSeg;                // Program Segmentation
+            DataMemory* DM;
 
             // ---------------------------------------------
             // Stage

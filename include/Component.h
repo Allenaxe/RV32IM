@@ -15,6 +15,11 @@ namespace RV32IM {
 
 	class ControlUnit {
 		/********************************************************
+         * - MemSize (2 bits) - Data width for DataMemory load/store
+         *     - `00` : byte (8 bits)
+         *     - `01` : half word (16 bits)
+         *     - `10` : full word (32 bits)
+         *     - `11` : reserved
 		 * - RegWrite ( 1 bit ) : register can write
 		 * - ALUSrc ( 1 bit ) : `Op2` in ALU is `immediate` or `rs2`
 		 * - MemRead ( 1 bit ) : data memory can read
@@ -23,14 +28,14 @@ namespace RV32IM {
 		 * - Jump ( 1 bit ) : Jump instruction
 		 * - MemtoReg ( 1 bit ) - data memory write into register
 		 * - ALUOp ( 3 bits ) - ALU Operation
-		 * 	- `000` : Load / Store
-		 * 	- `001` : Branch
-		 *  - `010` : R Type
-		 * 	- `011` : I Type
-		 * 	- Other: Reserved
+		 *     - `000` : Load / Store
+		 *     - `001` : Branch
+		 *     - `010` : R Type
+		 *     - `011` : I Type
+		 *     - Others: Reserved
 		********************************************************/
 		public:
-			static std::bitset <10> ControlSignal(std::bitset<7> &p_Opcode);
+			static std::bitset<13> ControlSignal (std::bitset<7> &p_Opcode, std::bitset<3> &p_Funct3);
 	};
 
 	class RegisterFile {

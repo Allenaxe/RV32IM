@@ -13,6 +13,7 @@ namespace RV32IM {
     };
 
     struct ControlSignal {
+        std::bitset<3> MemSize;
         bool RegWrite;
 		bool ALUSrc;
 		bool MemRead;
@@ -37,7 +38,7 @@ namespace RV32IM {
         std::bitset<5> rd;
         std::bitset<3> funct3;
         std::bitset<7> funct7;
-        std::bitset<10> control_signal;
+        std::bitset<13> control_signal;
         // ControlSignals ctrl;
     };
 

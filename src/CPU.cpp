@@ -1,8 +1,10 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), ProgSeg(p_ProgSeg), Record(new Printer(Filename, ConsoleOutput)) {
-        PC = ProgSeg->START_ADDR;
+    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), Record(new Printer(Filename, ConsoleOutput)) {
+        DM = new DataMemory(p_ProgSeg);
+
+        PC = p_ProgSeg->START_ADDR;
         IF_ID = {};
         ID_EX = {};
         EX_MEM = {};
@@ -10,7 +12,7 @@ namespace RV32IM {
     }
     void CPU::Fetch() {
         MAR = PC;
-        MDR = ProgSeg->Read(MAR);
+        MDR = DM -> seg -> Read(MAR);           // TODO: Use InstructionMemory instead of DataMemory
         IR = MDR;
         PC += 4;
     }
@@ -24,7 +26,7 @@ namespace RV32IM {
         std::bitset<7> funct7 {(p_DecodeInput.inst & 0xFE00'0000) >> 25};    // IR[25:31]
 
         uint32_t imm = ImmediateGenerator::Generate(p_DecodeInput.inst);
-        std::bitset<10> control_signal = ControlUnit::ControlSignal(opcode);
+        std::bitset<13> control_signal = ControlUnit::ControlSignal(opcode, funct3);
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
 
@@ -49,6 +51,9 @@ namespace RV32IM {
     }
 
     MEM_WB_Data CPU::Memory(EX_MEM_Data& p_MemoryInput) {
+        
+
+
         return MEM_WB_Data {};
     }
 

@@ -10,7 +10,7 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
-    std::bitset <10> ControlUnit::ControlSignal (std::bitset<7> &p_Opcode) {
+    std::bitset<13> ControlUnit::ControlSignal (std::bitset<7> &p_Opcode, std::bitset<3> &p_Funct3) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
@@ -34,18 +34,23 @@ namespace RV32IM {
         bool ALUOp_0 = Branch | isIType;
 
         unsigned long control_signal =
-            (RegWrite   << 9)  |
-            (ALUSrc     << 8)  |
-            (MemRead    << 7)  |
-            (MemWrite   << 6)  |
-            (Branch     << 5)  |
-            (Jump       << 4)  |
-            (MemtoReg   << 3)  |
-            (ALUOp_2    << 2)  |
-            (ALUOp_1    << 1)  |
-            (ALUOp_0        )  ;
+            (RegWrite   <<  9)  |
+            (ALUSrc     <<  8)  |
+            (MemRead    <<  7)  |
+            (MemWrite   <<  6)  |
+            (Branch     <<  5)  |
+            (Jump       <<  4)  |
+            (MemtoReg   <<  3)  |
+            (ALUOp_2    <<  2)  |
+            (ALUOp_1    <<  1)  |
+            (ALUOp_0         )  ;
 
-        return std::bitset <10> {control_signal};
+        std::string str_signal = p_Funct3.to_string();
+        for (int i=9; i>=0; i--){
+            str_signal += static_cast<char>(control_signal & (1 << i));
+        }
+
+        return std::bitset<13>(str_signal);
     }
 
     uint32_t ImmediateGenerator::DecodeType (std::bitset<7> p_Opcode) {
