@@ -10,7 +10,7 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
-    int32_t ForwardingUnit::MuxSelector(std::bitset<5> p_rs, int32_t p_op, 
+    int32_t ForwardingUnit::ALUMuxSelector(std::bitset<5> p_rs, int32_t p_op, 
             const EX_MEM_Data &EX_MEM, const MEM_WB_Data &MEM_WB) {
         // forwarding op
         std::tuple<bool, bool> forwarding_op = ForwardingUnit::ALUForwardingSignal(
@@ -28,6 +28,17 @@ namespace RV32IM {
                 MEM_WB.mem_data : MEM_WB.alu_result;
         }
         return p_op;
+    }
+
+    int32_t ForwardingUnit::DecodeMuxSelector(std::bitset<5> p_rs, int32_t p_rs_value, const MEM_WB_Data &MEM_WB){
+        // forwarding op
+        bool forwarding_op = ForwardingUnit::DecodeForwardingSignal(p_rs, MEM_WB.rd, MEM_WB.control_signal[9]);
+        // if hazard
+        if(forwarding_op) {
+            p_rs_value = MEM_WB.control_signal[3] ? // MemtoReg: select data from memory or ALU result
+                MEM_WB.mem_data : MEM_WB.alu_result;
+        }
+        return p_rs_value;
     }
 
     std::tuple<bool, bool> ForwardingUnit::ALUForwardingSignal (
@@ -53,6 +64,10 @@ namespace RV32IM {
         }
 
         return std::make_tuple(forward_ex, forward_wb);
+    }
+
+    bool ForwardingUnit::DecodeForwardingSignal (std::bitset<5> EX_rs, std::bitset<5> p_rd, bool p_RegWrite) {
+        return (p_RegWrite && (p_rd.to_ulong() != 0) && (p_rd.to_ulong() == EX_rs.to_ulong()));
     }
 
     std::bitset <10> ControlUnit::ControlSignal (std::bitset<7> &p_Opcode) {

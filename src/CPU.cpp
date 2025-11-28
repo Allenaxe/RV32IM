@@ -27,6 +27,8 @@ namespace RV32IM {
         std::bitset<10> control_signal = ControlUnit::ControlSignal(opcode);
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
+        RF_read.rs1 = ForwardingUnit::DecodeMuxSelector(rs1, RF_read.rs1, MEM_WB.Read());
+        RF_read.rs2 = ForwardingUnit::DecodeMuxSelector(rs2, RF_read.rs2, MEM_WB.Read());
 
         return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, rs1, rs2, funct3, funct7, control_signal };
     }
@@ -34,8 +36,8 @@ namespace RV32IM {
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
         int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.control_signal[4] | p_ExecuteInput.control_signal[5]));
         int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.control_signal[8]);
-        opA = ForwardingUnit::MuxSelector(p_ExecuteInput.RS1, opA, EX_MEM.Read(), MEM_WB.Read());
-        opB = ForwardingUnit::MuxSelector(p_ExecuteInput.RS2, opB, EX_MEM.Read(), MEM_WB.Read());
+        opA = ForwardingUnit::ALUMuxSelector(p_ExecuteInput.RS1, opA, EX_MEM.Read(), MEM_WB.Read());
+        opB = ForwardingUnit::ALUMuxSelector(p_ExecuteInput.RS2, opB, EX_MEM.Read(), MEM_WB.Read());
 
         std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
         int32_t control_signal = p_ExecuteInput.control_signal.to_ulong() & 0b111;
