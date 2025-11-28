@@ -10,7 +10,7 @@ namespace RV32IM {
     }
     void CPU::Fetch() {
         MAR = PC;
-        MDR = ProgSeg->Read(MAR);
+        MDR = InstrMem.FetchInstr(ProgSeg, MAR);
         IR = MDR;
         PC += 4;
     }
