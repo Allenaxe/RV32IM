@@ -5,6 +5,7 @@
 #include <sstream>
 #include <vector>
 #include "Structure.h"
+#include "Component.h"
 
 namespace RV32IM {
 

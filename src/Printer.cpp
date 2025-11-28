@@ -103,7 +103,7 @@ namespace RV32IM {
         os << "funct3         : " << out.funct3 << '\n';
         os << "funct7         : " << out.funct7 << '\n';
         os << "imm            : " << std::bitset<32>(out.imm) << "\n";
-        os << "control signal : " << out.control_signal << "\n";
+        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< "\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -114,7 +114,7 @@ namespace RV32IM {
         os << "alu result     : " << out.alu_result << '\n';
         os << "write data     : " << out.write_data << '\n';
         os << "rd             : " << out.rd << '\n';
-        os << "control signal : " << out.control_signal << "\n";
+        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< "\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -125,7 +125,7 @@ namespace RV32IM {
         os << "mem data       : " << out.mem_data << '\n';
         os << "alu result     : " << out.alu_result << '\n';
         os << "rd             : " << out.rd << '\n';
-        os << "control signal : " << out.control_signal << '\n';
+        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< '\n';
         os << "-------------------------------------------------\n";
     }
 
@@ -135,7 +135,7 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "writeback data : " << out.writeback_data << '\n';
         os << "rd             : " << out.rd << '\n';
-        os << "control signal : " << out.control_signal << '\n';
+        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< '\n';
         os << "-------------------------------------------------\n";
     }
 
