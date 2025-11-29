@@ -18,6 +18,11 @@ namespace RV32IM {
         public:
             ValueError(std::string _message);
     };
+
+    class MemoryError : public BaseError {
+        public:
+            MemoryError(std::string _message);
+    };
 }
 
 #endif

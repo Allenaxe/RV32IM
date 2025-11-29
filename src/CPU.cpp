@@ -1,9 +1,7 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), Record(new Printer(Filename, ConsoleOutput)) {
-        DM = new DataMemory(p_ProgSeg);
-
+    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): ProgSeg(p_ProgSeg), RF(new RegisterFile()), Record(new Printer(Filename, ConsoleOutput)) {
         PC = p_ProgSeg->START_ADDR;
         IF_ID = {};
         ID_EX = {};
@@ -44,10 +42,24 @@ namespace RV32IM {
     }
 
     MEM_WB_Data CPU::Memory(EX_MEM_Data& p_MemoryInput) {
-        
+        MemRW_t MemRW = p_MemoryInput.control_signal.mem_signal.MemRW;
+        bool SignExt = p_MemoryInput.control_signal.mem_signal.SignExt;
+        MEM_SIZE MemSize = p_MemoryInput.control_signal.mem_signal.MemSize;
+        // uint32_t Imm = p_MemoryInput.rd;
+
+        RV32IM::LoadStoreUnit LSU;
+        std::tuple<uint32_t, std::bitset<4>> AddrPack = LSU.DecodeAddr(p_MemoryInput.alu_result, MemSize);
 
 
-        return MEM_WB_Data {};
+        DataMemory DM(ProgSeg);
+        std::optional<uint32_t> mem_data = DM.Operate(MemRW, SignExt, std::get<1>(AddrPack), std::get<0>(AddrPack), p_MemoryInput.write_data);
+
+
+        return MEM_WB_Data {mem_data,
+                            p_MemoryInput.alu_result,
+                            p_MemoryInput.rd,
+                            p_MemoryInput.control_signal
+                            };
     }
 
     WB_Data CPU::WriteBack(MEM_WB_Data& p_WriteBackInput) {

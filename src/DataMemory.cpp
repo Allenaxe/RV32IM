@@ -1,50 +1,63 @@
 #include "DataMemory.h"
-#include "Exception.h"
 
 namespace RV32IM {
     DataMemory::DataMemory (std::unique_ptr<Segmentation>& p_Seg) : seg(std::move(p_Seg)) {}
 
-    std::optional<uint32_t> DataMemory::Operate (std::bitset<2> MemRW, std::bitset<2> SigMemSize, uint32_t p_Addr, int32_t p_Imm){
-        /********************
-         * MemRW:
-         *      - MemRW[0]: allow to read memory if this bit is set
-         *      - MemRW[1]: allow to write to memory if this bit is set
-         ********************/
+    std::optional<uint32_t> DataMemory::Operate (MemRW_t p_MemRW, bool p_SignExt, std::bitset<4> p_ByteMask, uint32_t p_Aligned4_Addr, int32_t p_Imm){
+        switch (p_MemRW) {
+            case MemRW_t::NOP :
+                return std::nullopt;
 
-        if (MemRW[0])
-            return Load(SigMemSize, p_Imm, p_Addr);
-        else if (MemRW[1])
-            return Store(p_Addr, p_Imm);
+            case MemRW_t::READ :
+                return Load(p_Aligned4_Addr, p_ByteMask, p_SignExt);
 
-        return std::nullopt;
-    }
-
-    // TODO: LBU & LHU are not implemented
-    uint32_t DataMemory::Load (std::bitset<2> SigMemSize, uint32_t p_Addr, int32_t p_Imm) {
-        uint32_t data = seg -> Read(p_Addr);
-
-        switch (SigMemSize.to_ulong()){
-
-            case 0b00:          // byte
-                return (data & 0xFFFFFF00);
-
-            case 0b01:          // half word
-                return (data & 0xFFFF0000);
-
-            case 0b10:          // word
-                return data;
-
-            case 0b11:          // reserved
-                throw ValueError("DataMemory: 0b00 of `SigMemSize` is reserved.");
-
-            default:
-                throw ValueError("DataMemory: `SigMemSize` didn't matched.");
+            case MemRW_t::WRITE :
+                return Store(p_Aligned4_Addr, p_ByteMask, p_Imm);
         }
-        return seg -> Read(addr);
+
+        return std::nullopt;
     }
 
-    std::nullopt_t DataMemory::Store (uint32_t p_Addr, int32_t p_Imm) {
-        seg -> Write(p_Addr, p_Imm);
+    uint32_t DataMemory::Load (int32_t p_Addr, std::bitset<4> p_ByteMask, bool SignExt) {
+        uint8_t ByteMask = p_ByteMask.to_ulong();
+
+        uint32_t FullByteMask = 0x00000000;
+        if (ByteMask & 0b0001) FullByteMask |= 0x000000FF;
+        if (ByteMask & 0b0010) FullByteMask |= 0x0000FF00;
+        if (ByteMask & 0b0100) FullByteMask |= 0x00FF0000;
+        if (ByteMask & 0b1000) FullByteMask |= 0xFF000000;
+
+
+        uint32_t data = seg -> Read(p_Addr);
+        data &= FullByteMask;
+
+        int TrailingZero = GetTrailingZero(p_ByteMask);
+
+        data >>= (TrailingZero * 8);
+
+        if (SignExt) {
+            int32_t mask = 1 << (TrailingZero * 8 - 1);
+            data = (data ^ mask) - mask;
+        }
+
+        return data;
+    }
+
+    std::nullopt_t DataMemory::Store (uint32_t p_Aligned4_Addr, std::bitset<4> p_ByteMask, int32_t p_Imm) {
+        size_t TraingZero = GetTrailingZero(p_ByteMask);
+
+        seg -> Write(p_Aligned4_Addr + TraingZero*8 , p_Imm, p_ByteMask);
+
         return std::nullopt;
+    }
+
+    size_t DataMemory::GetTrailingZero (std::bitset<4> p_ByteMask) {
+        size_t TrailingZero = 0;
+        for (int i=0; i<4; i++){
+            if (p_ByteMask[i] == 0) TrailingZero++;
+            else break;
+        }
+
+        return TrailingZero;
     }
 }

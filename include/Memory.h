@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <vector>
 #include <memory>
+#include <bitset>
 
 namespace RV32IM {
 
@@ -39,7 +40,7 @@ namespace RV32IM {
 
             Segmentation(uint32_t p_startAddr, uint32_t p_endAddr, uint32_t p_textLength);
             uint32_t Read (const uint32_t p_Address);
-            void Write (const uint32_t& p_Address, const uint32_t& p_Value);
+            void Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask = std::bitset<4>("1111"));
     };
 
 }

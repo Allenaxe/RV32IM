@@ -33,8 +33,29 @@ namespace RV32IM {
     }
 
     // TODO: use little endian instead
-    void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value) {
+    void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
+
+        // Reconstruct data to write
+        std::bitset<32> OriginalData { this->Read(p_Address) };
+        std::bitset<32> TargetData { p_Value };
+
+        std::bitset<32> ResultData("");
+        for (int i=0; i<4; i++){
+            if (p_ByteMask[i]) {
+                ResultData[i]   = TargetData[i];
+                ResultData[i+1] = TargetData[i+1];
+                ResultData[i+2] = TargetData[i+2];
+                ResultData[i+3] = TargetData[i+3];
+            }
+            else {
+                ResultData[i]   = OriginalData[i];
+                ResultData[i+1] = OriginalData[i+1];
+                ResultData[i+2] = OriginalData[i+2];
+                ResultData[i+3] = OriginalData[i+3];
+            }
+        }
+
         uint32_t ArrayOffset = AddrTranslate(p_Address);
-        Storage[ArrayOffset] = p_Value;
+        Storage[ArrayOffset] = ResultData.to_ulong();
     };
 }
