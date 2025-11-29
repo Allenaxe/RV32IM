@@ -10,7 +10,7 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
-    std::bitset<13> ControlUnit::ControlSignal (std::bitset<7> &p_Opcode, std::bitset<3> &p_Funct3) {
+    ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
@@ -29,28 +29,65 @@ namespace RV32IM {
         bool Branch = isBType;
         bool Jump = isJType | isJALR;
         bool MemtoReg = isLOAD;
-        bool ALUOp_2 = false;
-        bool ALUOp_1 = isRType | isIType;
-        bool ALUOp_0 = Branch | isIType;
 
-        unsigned long control_signal =
-            (RegWrite   <<  9)  |
-            (ALUSrc     <<  8)  |
-            (MemRead    <<  7)  |
-            (MemWrite   <<  6)  |
-            (Branch     <<  5)  |
-            (Jump       <<  4)  |
-            (MemtoReg   <<  3)  |
-            (ALUOp_2    <<  2)  |
-            (ALUOp_1    <<  1)  |
-            (ALUOp_0         )  ;
+        ALU_OP_TYPE ALUOp = static_cast<ALU_OP_TYPE>(((isRType | isIType) << 1) | (Branch | isIType));
 
-        std::string str_signal = p_Funct3.to_string();
-        for (int i=9; i>=0; i--){
-            str_signal += static_cast<char>(control_signal & (1 << i));
+        MEM_SIZE MemSize = static_cast<MEM_SIZE>(p_funct3.to_ulong() & 0b11);
+
+        bool Signext = !p_funct3[2];
+
+        return ControlSignal {
+            ExecuteSignal { ALUSrc, Branch, Jump, ALUOp },
+            MemorySignal { MemRead, MemWrite, Signext, MemSize },
+            WriteBackSignal { RegWrite, MemtoReg }
+        };
+    }
+
+    std::bitset<13> ControlUnit::SerializeControlSignal(const ControlSignal& control) {
+        std::bitset<13> output;
+        size_t current_bit = 0; // 從 LSB (0) 開始計數
+
+        // --- 寫回階段 (WB) ---
+        // RegWrite [0]
+        output[current_bit++] = control.wb_signal.RegWrite;
+        
+        // MemToReg [1]
+        output[current_bit++] = control.wb_signal.MemToReg;
+
+        // --- 記憶體階段 (MEM) ---
+        // MemRead [2]
+        output[current_bit++] = control.mem_signal.MemRead;
+        
+        // MemWrite [3]
+        output[current_bit++] = control.mem_signal.MemWrite;
+        
+        // Signext [4]
+        output[current_bit++] = control.mem_signal.Signext;
+
+        // MemSize [6:5] - 2 bits (使用 to_ulong 取得數值)
+        // 這裡需要將 Enum 數值按位元寫入
+        uint8_t mem_size_val = static_cast<uint8_t>(control.mem_signal.MemSize);
+        for (int i = 0; i < 2; ++i) {
+            output[current_bit++] = (mem_size_val >> i) & 1;
         }
 
-        return std::bitset<13>(str_signal);
+        // --- 執行階段 (EX) ---
+        // ALUSrc [7]
+        output[current_bit++] = control.ex_signal.ALUSrc;
+        
+        // Branch [8]
+        output[current_bit++] = control.ex_signal.Branch;
+        
+        // Jump [9]
+        output[current_bit++] = control.ex_signal.Jump;
+
+        // ALUOp [12:10] - 3 bits (使用 to_ulong 取得數值)
+        uint8_t alu_op_val = static_cast<uint8_t>(control.ex_signal.ALUOp);
+        for (int i = 0; i < 3; ++i) {
+            output[current_bit++] = (alu_op_val >> i) & 1;
+        }
+
+        return output;
     }
 
     uint32_t ImmediateGenerator::DecodeType (std::bitset<7> p_Opcode) {
@@ -163,19 +200,19 @@ namespace RV32IM {
     }
 
     // int32_t ALU::Operate(DecodeOutput p_DecodeOutput)
-    int32_t ALU::Operate (std::bitset<4> p_aluOp, int32_t control_signal, int32_t p_opA, int32_t p_opB) {
+    int32_t ALU::Operate (std::bitset<4> p_aluOp, ALU_OP_TYPE control_signal, int32_t p_opA, int32_t p_opB) {
 
         bool carryOut = false; // Carry Flag
         uint32_t complement;
 
-        switch (control_signal){
+        switch (control_signal) {
             // Load / Store
-            case 0b000: {
+            case ALU_OP_TYPE::MEMORY_REF: {
                 return p_opA + p_opB;
             }
 
             // Branch
-            case 0b001: {
+            case ALU_OP_TYPE::BRANCH: {
                 // return PC + imm
                 switch ((p_aluOp >> 1).to_ulong()) {
 
@@ -227,7 +264,7 @@ namespace RV32IM {
                 }
             }
 
-            case 0b010: { // R-type
+            case ALU_OP_TYPE::R_TYPE: { // R-type
                 switch (p_aluOp.to_ulong()) {
                     // ADD
                     case 0b0000:
@@ -277,7 +314,7 @@ namespace RV32IM {
                 }
             }
 
-            case 0b011: {       // I-type
+            case ALU_OP_TYPE::I_TYPE: {       // I-type
                 switch (p_aluOp.to_ulong()) {
 
                     // ADDI
