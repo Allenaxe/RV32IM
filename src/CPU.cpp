@@ -12,7 +12,7 @@ namespace RV32IM {
     }
     void CPU::Fetch() {
         MAR = PC;
-        MDR = DM -> seg -> Read(MAR);           // TODO: Use InstructionMemory instead of DataMemory
+        MDR = InstrMem.FetchInstr(ProgSeg, MAR);
         IR = MDR;
         PC += 4;
     }

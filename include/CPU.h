@@ -4,6 +4,7 @@
 #include <iostream>
 #include <cstdint>
 #include <bitset>
+#include <memory>
 
 #include "PipelineRegister.h"
 #include "Component.h"
@@ -11,14 +12,13 @@
 #include "Printer.h"
 #include "Memory.h"
 #include "DataMemory.h"
+#include "InstructionMemory.h"
 
 namespace RV32IM {
 
     class CPU {
         private:
-            // ---------------------------------------------
-            // Register
-            // ---------------------------------------------
+            // Registers
             uint32_t PC;                            // Program Counter
             uint32_t MAR;                           // Memory Address Register
             uint32_t MDR;                           // Memory Data Register
@@ -36,23 +36,20 @@ namespace RV32IM {
             // bool m_SignedMode;
             // bool m_Halt;
 
-            // ---------------------------------------------
-            // Main Memory
-            // ---------------------------------------------
-            DataMemory* DM;
+            // Segmentation
+            std::unique_ptr<Segmentation>& ProgSeg;                // Program Segmentation
 
-            // ---------------------------------------------
-            // Stage
-            // ---------------------------------------------
+            // Component
+            InstructionMemory InstrMem;
+
+            // Stages
             void Fetch();
             ID_EX_Data Decode(IF_ID_Data& p_DecodeInput);
             EX_MEM_Data Execute(ID_EX_Data& p_ExecuteInput);
             MEM_WB_Data Memory(EX_MEM_Data& p_MemoryInput);
             WB_Data WriteBack(MEM_WB_Data& p_WriteBackInput);
 
-            // ---------------------------------------------
             // Utility
-            // ---------------------------------------------
             Printer* Record;
 
         public:
