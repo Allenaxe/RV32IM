@@ -26,14 +26,20 @@ namespace RV32IM {
         return (p_Address - START_ADDR) / sizeof(uint32_t);
     }
 
-    // TODO: use little endian instead
     uint32_t Segmentation::Read (uint32_t p_Address) {
         uint32_t ArrayOffset = AddrTranslate(p_Address);
-        return Storage[ArrayOffset];
+        uint32_t data = Storage[ArrayOffset];       // Read in little endian
+
+        return EndianceToggle(data);                // Convert to big endian
     }
 
-    // TODO: use little endian instead
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
+
+        std::bitset<4> LE_ByteMask;
+        LE_ByteMask[3] = p_ByteMask[0];
+        LE_ByteMask[2] = p_ByteMask[1];
+        LE_ByteMask[1] = p_ByteMask[2];
+        LE_ByteMask[0] = p_ByteMask[3];
 
         // Reconstruct data to write
         std::bitset<32> OriginalData { this->Read(p_Address) };
@@ -41,7 +47,7 @@ namespace RV32IM {
 
         std::bitset<32> ResultData("");
         for (int i=0; i<4; i++){
-            if (p_ByteMask[i]) {
+            if (LE_ByteMask[i]) {
                 ResultData[i]   = TargetData[i];
                 ResultData[i+1] = TargetData[i+1];
                 ResultData[i+2] = TargetData[i+2];
@@ -56,6 +62,14 @@ namespace RV32IM {
         }
 
         uint32_t ArrayOffset = AddrTranslate(p_Address);
-        Storage[ArrayOffset] = ResultData.to_ulong();
+        Storage[ArrayOffset] = EndianceToggle(ResultData.to_ulong());           // Convert to little-endian
     };
+
+    // Convert between big endian and little endian
+    uint32_t Segmentation::EndianceToggle (uint32_t p_Data) {
+        return ((p_Data & 0x0000'00FF) << 24) |
+               ((p_Data & 0x0000'FF00) <<  8) |
+               ((p_Data & 0x00FF'0000) >>  8) |
+               ((p_Data & 0xFF00'0000) >> 24);
+    }
 }

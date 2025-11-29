@@ -29,14 +29,16 @@ namespace RV32IM {
 
     class Segmentation : public MainMemory {
         private:
-            uint32_t AddrTranslate (const uint32_t p_Address);      // helper function
+            // Helper functions
+            uint32_t AddrTranslate (const uint32_t p_Address);
+            uint32_t EndianceToggle (uint32_t p_Data);
 
         public:
-            const uint32_t START_ADDR;      // text section starts here
+            const uint32_t START_ADDR;      // Text section starts here
             const uint32_t DATA_ADDR;
             const uint32_t BSS_ADDR;
             const uint32_t HEAP_ADDR;
-            const uint32_t END_ADDR;        // stack section starts here
+            const uint32_t END_ADDR;        // Stack section starts here
 
             Segmentation(uint32_t p_startAddr, uint32_t p_endAddr, uint32_t p_textLength);
             uint32_t Read (const uint32_t p_Address);

@@ -9,7 +9,7 @@ namespace RV32IM {
         switch (MemSize) {
 
             case MEM_SIZE::BYTE :
-                // Determine in little-endian
+                // Determine in big-endian
                 switch (p_Addr & 0b11) {
                     case 0b00:
                         ByteMask = std::bitset<4>("0001");      // Forth byte, the lowest byte
