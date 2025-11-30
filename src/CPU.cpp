@@ -28,17 +28,20 @@ namespace RV32IM {
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
 
-        return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, funct3, funct7, control_signal };
+        return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, rs1, rs2, funct3, funct7, control_signal };
     }
 
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
         int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.control_signal.ex_signal.Branch | p_ExecuteInput.control_signal.ex_signal.Jump));
         int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.control_signal.ex_signal.ALUSrc);
+        opA = ForwardingUnit::ALUMux(p_ExecuteInput.RS1, opA, EX_MEM.Read(), MEM_WB.Read());
+        opB = ForwardingUnit::ALUMux(p_ExecuteInput.RS2, opB, EX_MEM.Read(), MEM_WB.Read());
+
         std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
         ALU_OP_TYPE control_signal = p_ExecuteInput.control_signal.ex_signal.ALUOp;
         int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
-
-        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd};
+        
+        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd, p_ExecuteInput.control_signal};
     }
 
     MEM_WB_Data CPU::Memory(EX_MEM_Data& p_MemoryInput) {
@@ -46,7 +49,13 @@ namespace RV32IM {
     }
 
     WB_Data CPU::WriteBack(MEM_WB_Data& p_WriteBackInput) {
-        return WB_Data {};
+        uint32_t writeback_data = p_WriteBackInput.control_signal.wb_signal.MemToReg ? // MemtoReg: select data from memory or ALU result
+            p_WriteBackInput.mem_data : p_WriteBackInput.alu_result;
+
+        if(p_WriteBackInput.control_signal.wb_signal.RegWrite) // RegWrite: write back to Register File
+            RF->Write(p_WriteBackInput.rd.to_ulong(), writeback_data, p_WriteBackInput.control_signal.wb_signal.RegWrite);
+
+        return WB_Data {writeback_data, p_WriteBackInput.rd, p_WriteBackInput.control_signal};
     }
 
     void CPU::Run() {

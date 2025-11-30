@@ -64,6 +64,8 @@ namespace RV32IM {
         uint32_t rs2;
         uint32_t imm;
         std::bitset<5> rd;
+        std::bitset<5> RS1;
+        std::bitset<5> RS2;
         std::bitset<3> funct3;
         std::bitset<7> funct7;
         ControlSignal control_signal;

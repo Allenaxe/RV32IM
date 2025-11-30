@@ -10,6 +10,51 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
+    int32_t ForwardingUnit::ALUMux(std::bitset<5> p_rs, int32_t p_op, 
+            const EX_MEM_Data &EX_MEM, const MEM_WB_Data &MEM_WB) {
+        // forwarding op
+        std::tuple<bool, bool> forwarding_op = ForwardingUnit::ALUForwardingSignal(
+            p_rs.to_ulong(),
+            EX_MEM.rd, EX_MEM.control_signal.ex_signal.ALUSrc,
+            MEM_WB.rd, MEM_WB.control_signal.ex_signal.ALUSrc
+        );
+        // if ex hazard
+        if(std::get<0>(forwarding_op)) {
+            p_op = EX_MEM.alu_result;
+        }
+        // if mem hazard
+        else if(std::get<1>(forwarding_op)) {
+            p_op = MEM_WB.control_signal.wb_signal.MemToReg ? // MemtoReg: select data from memory or ALU result
+                MEM_WB.mem_data : MEM_WB.alu_result;
+        }
+        return p_op;
+    }
+
+    std::tuple<bool, bool> ForwardingUnit::ALUForwardingSignal (
+        uint8_t EX_rs,
+        std::bitset<5> p_EX_MEM_rd, bool p_EX_MEM_RegWrite,
+        std::bitset<5> p_MEM_WB_rd, bool p_MEM_WB_RegWrite
+    ) {
+        bool forward_ex = false;
+        bool forward_wb = false;
+
+        // EX hazard
+        if (p_EX_MEM_RegWrite && 
+            (p_EX_MEM_rd.to_ulong() != 0) && 
+            (p_EX_MEM_rd.to_ulong() == EX_rs)) {
+            forward_ex = true;
+        }
+
+        // MEM hazard
+        else if (p_MEM_WB_RegWrite && 
+            (p_MEM_WB_rd.to_ulong() != 0) && 
+            (p_MEM_WB_rd.to_ulong() == EX_rs)) {
+            forward_wb = true;
+        }
+
+        return std::make_tuple(forward_ex, forward_wb);
+    }
+
     ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
