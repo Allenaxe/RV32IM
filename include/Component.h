@@ -32,7 +32,6 @@ namespace RV32IM {
 
 		public:
 			static ControlSignal Generate(std::bitset<7> &p_Opcode, std::bitset<3> &funct3);
-			static std::bitset<13> SerializeControlSignal(const ControlSignal& control);
 	};
 
 	class RegisterFile {

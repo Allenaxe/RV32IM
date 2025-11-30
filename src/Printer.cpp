@@ -2,6 +2,25 @@
 
 namespace RV32IM {
 
+    std::ostream& operator<<(std::ostream& os, MEM_SIZE size) {
+        switch(size) {
+            case MEM_SIZE::BYTE: os << "BYTE"; break;
+            case MEM_SIZE::HALF: os << "HALF"; break;
+            case MEM_SIZE::WORD: os << "WORD"; break;
+        }
+        return os;
+    }
+
+    std::ostream& operator<<(std::ostream& os, ALU_OP_TYPE t) {
+        switch(t) {
+            case ALU_OP_TYPE::MEMORY_REF: os << "MEMORY_REF"; break;
+            case ALU_OP_TYPE::BRANCH:     os << "BRANCH"; break;
+            case ALU_OP_TYPE::R_TYPE:     os << "R_TYPE"; break;
+            case ALU_OP_TYPE::I_TYPE:     os << "I_TYPE"; break;
+        }
+        return os;
+    }
+
     Printer::Printer (const std::string& Filename, bool toConsole): ConsoleOutput(toConsole) {
         LogFile.open(Filename);
         if(!LogFile.is_open()) {
@@ -88,8 +107,8 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "[FETCH]\n";
         os << "-------------------------------------------------\n";
-        os << "Program Counter: " << out.pc << '\n';
-        os << "Instruction    : " << std::bitset<32> {out.inst} << '\n';
+        os << "Program Counter                        : " << out.pc << '\n';
+        os << "Instruction                            : " << std::bitset<32> {out.inst} << '\n';
         os << "-------------------------------------------------\n";
     }
 
@@ -97,13 +116,13 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "[DECODE]\n";
         os << "-------------------------------------------------\n";
-        os << "rs1            : " << out.rs1 << '\n';
-        os << "rs2            : " << out.rs2 << '\n';
-        os << "rd             : " << out.rd << '\n';
-        os << "funct3         : " << out.funct3 << '\n';
-        os << "funct7         : " << out.funct7 << '\n';
-        os << "imm            : " << std::bitset<32>(out.imm) << "\n";
-        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< "\n";
+        os << "rs1                                    : " << out.rs1 << '\n';
+        os << "rs2                                    : " << out.rs2 << '\n';
+        os << "rd                                     : " << out.rd << '\n';
+        os << "funct3                                 : " << out.funct3 << '\n';
+        os << "funct7                                 : " << out.funct7 << '\n';
+        os << "imm                                    : " << std::bitset<32>(out.imm) << "\n";
+        os << "{ ALUSrc, Branch, Jump, ALUOp }        : " << "{ " << out.ex_ctrl.ALUSrc << ", " << out.ex_ctrl.Branch << ", " << out.ex_ctrl.Jump << ", " << out.ex_ctrl.ALUOp << " }\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -111,10 +130,10 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "[EXECUTE]\n";
         os << "-------------------------------------------------\n";
-        os << "alu result     : " << out.alu_result << '\n';
-        os << "write data     : " << out.write_data << '\n';
-        os << "rd             : " << out.rd << '\n';
-        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< "\n";
+        os << "alu result                             : " << out.alu_result << '\n';
+        os << "write data                             : " << out.write_data << '\n';
+        os << "rd                                     : " << out.rd << '\n';
+        os << "{ MemRead, MemWrite, Signext, MemSize }: " << "{ " << out.mem_ctrl.MemRead << ", " << out.mem_ctrl.MemWrite << ", " << out.mem_ctrl.Signext << ", " << out.mem_ctrl.MemSize << " }\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -122,10 +141,10 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "[MEMORY]\n";
         os << "-------------------------------------------------\n";
-        os << "mem data       : " << out.mem_data << '\n';
-        os << "alu result     : " << out.alu_result << '\n';
-        os << "rd             : " << out.rd << '\n';
-        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< '\n';
+        os << "mem data                               : " << out.mem_data << '\n';
+        os << "alu result                             : " << out.alu_result << '\n';
+        os << "rd                                     : " << out.rd << '\n';
+        os << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.MemToReg << ", " << out.wb_ctrl.RegWrite << " }\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -133,9 +152,8 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "[WRITEBACK]\n";
         os << "-------------------------------------------------\n";
-        os << "writeback data : " << out.writeback_data << '\n';
-        os << "rd             : " << out.rd << '\n';
-        os << "control signal : " << ControlUnit::SerializeControlSignal(out.control_signal)<< '\n';
+        os << "writeback data                         : " << out.writeback_data << '\n';
+        os << "rd                                     : " << out.rd << '\n';
         os << "-------------------------------------------------\n";
     }
 

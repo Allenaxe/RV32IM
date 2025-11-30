@@ -28,17 +28,17 @@ namespace RV32IM {
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
 
-        return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, funct3, funct7, control_signal };
+        return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, funct3, funct7, control_signal.ex_ctrl, control_signal.mem_ctrl, control_signal.wb_ctrl };
     }
 
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
-        int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.control_signal.ex_signal.Branch | p_ExecuteInput.control_signal.ex_signal.Jump));
-        int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.control_signal.ex_signal.ALUSrc);
+        int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.ex_ctrl.Branch | p_ExecuteInput.ex_ctrl.Jump));
+        int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.ex_ctrl.ALUSrc);
         std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
-        ALU_OP_TYPE control_signal = p_ExecuteInput.control_signal.ex_signal.ALUOp;
+        ALU_OP_TYPE control_signal = p_ExecuteInput.ex_ctrl.ALUOp;
         int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
 
-        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd};
+        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd, p_ExecuteInput.mem_ctrl, p_ExecuteInput.wb_ctrl };
     }
 
     MEM_WB_Data CPU::Memory(EX_MEM_Data& p_MemoryInput) {

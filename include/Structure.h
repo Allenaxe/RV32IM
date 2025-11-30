@@ -45,11 +45,10 @@ namespace RV32IM {
         bool MemToReg;
     };
 
-
     struct ControlSignal {
-        ExecuteSignal ex_signal;
-        MemorySignal mem_signal;
-        WriteBackSignal wb_signal;
+        ExecuteSignal ex_ctrl;
+        MemorySignal mem_ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
     // IF/ID Register
@@ -66,8 +65,9 @@ namespace RV32IM {
         std::bitset<5> rd;
         std::bitset<3> funct3;
         std::bitset<7> funct7;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
+        ExecuteSignal ex_ctrl;
+        MemorySignal mem_ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
     // EX/MEM Register
@@ -75,8 +75,8 @@ namespace RV32IM {
         uint32_t alu_result;
         uint32_t write_data;
         std::bitset<5>  rd;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
+        MemorySignal mem_ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
     // MEM/WB Register
@@ -84,15 +84,12 @@ namespace RV32IM {
         uint32_t mem_data;
         uint32_t alu_result;
         std::bitset<5> rd;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
      struct WB_Data {
         uint32_t writeback_data;
         std::bitset<5> rd;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
     };
 
     struct CycleSnapshot {

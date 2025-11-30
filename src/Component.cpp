@@ -43,53 +43,6 @@ namespace RV32IM {
         };
     }
 
-    std::bitset<13> ControlUnit::SerializeControlSignal(const ControlSignal& control) {
-        std::bitset<13> output;
-        size_t current_bit = 0; // 從 LSB (0) 開始計數
-
-        // --- 寫回階段 (WB) ---
-        // RegWrite [0]
-        output[current_bit++] = control.wb_signal.RegWrite;
-        
-        // MemToReg [1]
-        output[current_bit++] = control.wb_signal.MemToReg;
-
-        // --- 記憶體階段 (MEM) ---
-        // MemRead [2]
-        output[current_bit++] = control.mem_signal.MemRead;
-        
-        // MemWrite [3]
-        output[current_bit++] = control.mem_signal.MemWrite;
-        
-        // Signext [4]
-        output[current_bit++] = control.mem_signal.Signext;
-
-        // MemSize [6:5] - 2 bits (使用 to_ulong 取得數值)
-        // 這裡需要將 Enum 數值按位元寫入
-        uint8_t mem_size_val = static_cast<uint8_t>(control.mem_signal.MemSize);
-        for (int i = 0; i < 2; ++i) {
-            output[current_bit++] = (mem_size_val >> i) & 1;
-        }
-
-        // --- 執行階段 (EX) ---
-        // ALUSrc [7]
-        output[current_bit++] = control.ex_signal.ALUSrc;
-        
-        // Branch [8]
-        output[current_bit++] = control.ex_signal.Branch;
-        
-        // Jump [9]
-        output[current_bit++] = control.ex_signal.Jump;
-
-        // ALUOp [12:10] - 3 bits (使用 to_ulong 取得數值)
-        uint8_t alu_op_val = static_cast<uint8_t>(control.ex_signal.ALUOp);
-        for (int i = 0; i < 3; ++i) {
-            output[current_bit++] = (alu_op_val >> i) & 1;
-        }
-
-        return output;
-    }
-
     uint32_t ImmediateGenerator::DecodeType (std::bitset<7> p_Opcode) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
