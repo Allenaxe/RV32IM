@@ -1,4 +1,5 @@
 #include "Memory.h"
+#include "Exception.h"
 
 namespace RV32IM {
     std::vector<uint32_t> MainMemory::Storage;
@@ -27,6 +28,13 @@ namespace RV32IM {
     }
 
     uint32_t Segmentation::Read (uint32_t p_Address) {
+
+        // Check if target address is readable
+        if (p_Address < START_ADDR || p_Address > END_ADDR) {
+            std::string message = std::format("This address {} is not readable.", p_Address);
+            throw SegmentationError(message);
+        }
+
         uint32_t ArrayOffset = AddrTranslate(p_Address);
         uint32_t data = Storage[ArrayOffset];       // Read in little endian
 
@@ -34,6 +42,12 @@ namespace RV32IM {
     }
 
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
+
+        // Check if target address is writable
+        if (p_Address < HEAP_ADDR || p_Address > END_ADDR) {
+            std::string message = std::format("This address {} is not writable.", p_Address);
+            throw SegmentationError(message);
+        }
 
         // Make the data to write to algned with OrignalData
         std::bitset<32> TargetData { p_Value };

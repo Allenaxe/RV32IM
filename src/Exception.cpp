@@ -8,9 +8,8 @@ namespace RV32IM {
     }
 
     std::string BaseError::ShowMessage(){
-        return message;
+        return std::format("{}: {}", ExceptionName, message);
     }
-
 
     // ValueError
     ValueError::ValueError (std::string _message) : BaseError(_message) {};
@@ -19,4 +18,6 @@ namespace RV32IM {
     // MemoryError
     MemoryError::MemoryError (std::string _message) : BaseError(_message) {};
 
+    // SegmentationError
+    SegmentationError::SegmentationError (std::string _message) : BaseError(_message) {};
 }
