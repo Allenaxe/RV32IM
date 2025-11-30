@@ -10,6 +10,48 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
+    uint32_t ForwardingUnit::ALUMux(std::bitset<5> p_rs, uint32_t p_op, 
+            const EX_MEM_Data &EX_MEM, const MEM_WB_Data &MEM_WB) {
+        // forwarding op
+        std::bitset<2> forwarding_op = ForwardingUnit::ALUForwardingSignal(
+            p_rs.to_ulong(),
+            EX_MEM.rd, EX_MEM.wb_ctrl.RegWrite,
+            MEM_WB.rd, MEM_WB.wb_ctrl.RegWrite
+        );
+        // if ex hazard
+        if(forwarding_op == 0b10) {
+            p_op = EX_MEM.alu_result;
+        }
+        // if mem hazard
+        else if(forwarding_op == 0b01) {
+            p_op = MEM_WB.wb_ctrl.MemToReg ? MEM_WB.mem_data.value_or(0) : MEM_WB.alu_result;
+        }
+
+        return p_op;
+    }
+
+    std::bitset<2> ForwardingUnit::ALUForwardingSignal (
+        uint8_t EX_rs,
+        std::bitset<5> p_EX_MEM_rd, bool p_EX_MEM_RegWrite,
+        std::bitset<5> p_MEM_WB_rd, bool p_MEM_WB_RegWrite
+    ) {
+        // EX hazard
+        if (p_EX_MEM_RegWrite && 
+            (p_EX_MEM_rd.to_ulong() != 0) && 
+            (p_EX_MEM_rd.to_ulong() == EX_rs)) {
+            return std::bitset<2> {"10"};
+        }
+
+        // MEM hazard
+        else if (p_MEM_WB_RegWrite && 
+            (p_MEM_WB_rd.to_ulong() != 0) && 
+            (p_MEM_WB_rd.to_ulong() == EX_rs)) {
+            return std::bitset<2> {"01"};
+        }
+
+        return std::bitset<2> {"00"};
+    }
+
     ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];
@@ -24,8 +66,9 @@ namespace RV32IM {
 
         bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJType;
         bool ALUSrc = isIType | isLOAD | isSType;
-        bool MemRead = isLOAD;
-        bool MemWrite = isSType;
+
+        MEM_RW MemRW =  static_cast<MEM_RW>((isLOAD << 1) & isSType);
+        
         bool Branch = isBType;
         bool Jump = isJType | isJALR;
         bool MemtoReg = isLOAD;
@@ -34,11 +77,11 @@ namespace RV32IM {
 
         MEM_SIZE MemSize = static_cast<MEM_SIZE>(p_funct3.to_ulong() & 0b11);
 
-        bool Signext = !p_funct3[2];
+        bool SignExt = !p_funct3[2];
 
         return ControlSignal {
             ExecuteSignal { ALUSrc, Branch, Jump, ALUOp },
-            MemorySignal { MemRead, MemWrite, Signext, MemSize },
+            MemorySignal { MemRW, SignExt, MemSize },
             WriteBackSignal { RegWrite, MemtoReg }
         };
     }

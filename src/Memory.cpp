@@ -28,11 +28,49 @@ namespace RV32IM {
 
     uint32_t Segmentation::Read (uint32_t p_Address) {
         uint32_t ArrayOffset = AddrTranslate(p_Address);
-        return Storage[ArrayOffset];
+        uint32_t data = Storage[ArrayOffset];       // Read in little endian
+
+        return EndianceToggle(data);                // Convert to big endian
     }
 
-    void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value) {
+    void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
+
+        // Make the data to write to algned with OrignalData
+        std::bitset<32> TargetData { p_Value };
+        for (int i=0; i<4; i++){
+            if (p_ByteMask[i] == 0)
+                TargetData <<= 8;
+            else
+                break;
+        }
+
+        // Reconstruct data to write (in big endian)
+        std::bitset<32> OriginalData { EndianceToggle(this->Read(p_Address)) };         // Convert little endian to big endian
+        std::bitset<32> ResultData("");
+        for (int i=0; i<4; i++){
+            if (p_ByteMask[i]) {
+                ResultData[i]   = TargetData[i];
+                ResultData[i+1] = TargetData[i+1];
+                ResultData[i+2] = TargetData[i+2];
+                ResultData[i+3] = TargetData[i+3];
+            }
+            else {
+                ResultData[i]   = OriginalData[i];
+                ResultData[i+1] = OriginalData[i+1];
+                ResultData[i+2] = OriginalData[i+2];
+                ResultData[i+3] = OriginalData[i+3];
+            }
+        }
+
         uint32_t ArrayOffset = AddrTranslate(p_Address);
-        Storage[ArrayOffset] = p_Value;
+        Storage[ArrayOffset] = EndianceToggle(ResultData.to_ulong());           // Convert to little-endian
     };
+
+    // Convert between big endian and little endian
+    uint32_t Segmentation::EndianceToggle (uint32_t p_Data) {
+        return ((p_Data & 0x0000'00FF) << 24) |
+               ((p_Data & 0x0000'FF00) <<  8) |
+               ((p_Data & 0x00FF'0000) >>  8) |
+               ((p_Data & 0xFF00'0000) >> 24);
+    }
 }

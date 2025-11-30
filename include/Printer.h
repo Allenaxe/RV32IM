@@ -9,6 +9,7 @@
 
 namespace RV32IM {
 
+    std::ostream& operator<<(std::ostream& os, MEM_RW size);
     std::ostream& operator<<(std::ostream& os, MEM_SIZE size);
     std::ostream& operator<<(std::ostream& os, ALU_OP_TYPE t);
 

@@ -2,6 +2,15 @@
 
 namespace RV32IM {
 
+    std::ostream& operator<<(std::ostream& os, MEM_RW size) {
+        switch(size) {
+            case MEM_RW::NOP: os << "NOP"; break;
+            case MEM_RW::READ: os << "READ"; break;
+            case MEM_RW::WRITE: os << "WRITE"; break;
+        }
+        return os;
+    }
+
     std::ostream& operator<<(std::ostream& os, MEM_SIZE size) {
         switch(size) {
             case MEM_SIZE::BYTE: os << "BYTE"; break;
@@ -133,7 +142,7 @@ namespace RV32IM {
         os << "alu result                             : " << out.alu_result << '\n';
         os << "write data                             : " << out.write_data << '\n';
         os << "rd                                     : " << out.rd << '\n';
-        os << "{ MemRead, MemWrite, Signext, MemSize }: " << "{ " << out.mem_ctrl.MemRead << ", " << out.mem_ctrl.MemWrite << ", " << out.mem_ctrl.Signext << ", " << out.mem_ctrl.MemSize << " }\n";
+        os << "{ MemRead, MemWrite, Signext, MemSize }: " << "{ " << out.mem_ctrl.MemRW << ", " << out.mem_ctrl.SignExt << ", " << out.mem_ctrl.MemSize << " }\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -141,7 +150,7 @@ namespace RV32IM {
         os << "-------------------------------------------------\n";
         os << "[MEMORY]\n";
         os << "-------------------------------------------------\n";
-        os << "mem data                               : " << out.mem_data << '\n';
+        os << "mem data                               : " << out.mem_data.value_or(0) << '\n';
         os << "alu result                             : " << out.alu_result << '\n';
         os << "rd                                     : " << out.rd << '\n';
         os << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.MemToReg << ", " << out.wb_ctrl.RegWrite << " }\n";
