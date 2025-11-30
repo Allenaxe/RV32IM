@@ -15,19 +15,27 @@ namespace RV32IM {
 
 	class ControlUnit {
 		/********************************************************
+         * - MemSize (2 bits) - Data width for DataMemory load/store
+         *     - `00` : byte (8 bits)
+         *     - `01` : half word (16 bits)
+         *     - `10` : full word (32 bits)
+         *     - `11` : reserved
 		 * - RegWrite ( 1 bit ) : register can write
 		 * - ALUSrc ( 1 bit ) : `Op2` in ALU is `immediate` or `rs2`
-		 * - MemRead ( 1 bit ) : data memory can read
-		 * - MemWrite ( 1 bit ) : data memory can write
+		 * - MemRW ( 2 bit ) : enable data memory to read/write
+         *     - 00: Skip MEM stage
+		 *     - 01: Able to read
+         *     - 10: Able to write
+         *     - 11: Error
 		 * - Branch ( 1 bit ) : branch instruction
 		 * - Jump ( 1 bit ) : Jump instruction
 		 * - MemtoReg ( 1 bit ) - data memory write into register
 		 * - ALUOp ( 3 bits ) - ALU Operation
-		 * 	- `000` : Load / Store
-		 * 	- `001` : Branch
-		 *  - `010` : R Type
-		 * 	- `011` : I Type
-		 * 	- Other: Reserved
+		 *     - `000` : Load / Store
+		 *     - `001` : Branch
+		 *     - `010` : R Type
+		 *     - `011` : I Type
+		 *     - Others: Reserved
 		********************************************************/
 
 		public:

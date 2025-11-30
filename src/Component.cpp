@@ -69,8 +69,9 @@ namespace RV32IM {
 
         bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJType;
         bool ALUSrc = isIType | isLOAD | isSType;
-        bool MemRead = isLOAD;
-        bool MemWrite = isSType;
+
+        MemRW_t MemRW =  static_cast<MemRW_t>((isLOAD << 1) & isSType);
+        
         bool Branch = isBType;
         bool Jump = isJType | isJALR;
         bool MemtoReg = isLOAD;
@@ -79,11 +80,11 @@ namespace RV32IM {
 
         MEM_SIZE MemSize = static_cast<MEM_SIZE>(p_funct3.to_ulong() & 0b11);
 
-        bool Signext = !p_funct3[2];
+        bool SignExt = !p_funct3[2];
 
         return ControlSignal {
             ExecuteSignal { ALUSrc, Branch, Jump, ALUOp },
-            MemorySignal { MemRead, MemWrite, Signext, MemSize },
+            MemorySignal { MemRW, SignExt, MemSize },
             WriteBackSignal { RegWrite, MemtoReg }
         };
     }
@@ -100,14 +101,13 @@ namespace RV32IM {
         output[current_bit++] = control.wb_signal.MemToReg;
 
         // --- 記憶體階段 (MEM) ---
-        // MemRead [2]
-        output[current_bit++] = control.mem_signal.MemRead;
+        // MemWrite [3:2]
+        uint8_t mem_rw_val = static_cast<uint8_t>(control.mem_signal.MemRW);
+        output[current_bit++] = mem_rw_val & 0b01;        // Read
+        output[current_bit++] = mem_rw_val & 0b10;        // Write
         
-        // MemWrite [3]
-        output[current_bit++] = control.mem_signal.MemWrite;
-        
-        // Signext [4]
-        output[current_bit++] = control.mem_signal.Signext;
+        // SignExt [4]
+        output[current_bit++] = control.mem_signal.SignExt;
 
         // MemSize [6:5] - 2 bits (使用 to_ulong 取得數值)
         // 這裡需要將 Enum 數值按位元寫入

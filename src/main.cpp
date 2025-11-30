@@ -1,7 +1,7 @@
 #include "CPU.h"
 #include "Memory.h"
 #include "Loader.h"
-
+#include "Exception.h"
 
 int main() {
     RV32IM::MainMemory myMemory;
@@ -13,4 +13,5 @@ int main() {
 
     RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, "Log.txt", true);
     cpu->Run();
+
 }

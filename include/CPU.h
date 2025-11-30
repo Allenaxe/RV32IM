@@ -11,6 +11,8 @@
 #include "Structure.h"
 #include "Printer.h"
 #include "Memory.h"
+#include "LoadStoreUnit.h"
+#include "DataMemory.h"
 #include "InstructionMemory.h"
 
 namespace RV32IM {

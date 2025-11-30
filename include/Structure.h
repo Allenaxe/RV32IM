@@ -12,6 +12,12 @@ namespace RV32IM {
         uint32_t rs2;
     };
 
+    enum class MemRW_t : uint8_t {
+        NOP   = 0,  // Do nothing
+        READ  = 1,  // Able to read
+        WRITE = 2,  // Able to write
+    };
+
     enum class MEM_SIZE : uint8_t {
         BYTE = 0,   // 對應 funct3: 000 (LB/SB)
         HALF = 1,   // 對應 funct3: 001 (LH/SH)
@@ -34,9 +40,8 @@ namespace RV32IM {
     };
 
     struct MemorySignal {
-        bool MemRead;
-        bool MemWrite;
-        bool Signext;
+        MemRW_t MemRW;
+        bool SignExt;
         MEM_SIZE MemSize;
     };
 
@@ -83,7 +88,7 @@ namespace RV32IM {
 
     // MEM/WB Register
     struct MEM_WB_Data {
-        uint32_t mem_data;
+        std::optional<uint32_t> mem_data;
         uint32_t alu_result;
         std::bitset<5> rd;
         ControlSignal control_signal;
