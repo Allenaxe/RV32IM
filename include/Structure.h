@@ -12,15 +12,44 @@ namespace RV32IM {
         uint32_t rs2;
     };
 
-    struct ControlSignal {
+    enum class MEM_SIZE : uint8_t {
+        BYTE = 0,   // 對應 funct3: 000 (LB/SB)
+        HALF = 1,   // 對應 funct3: 001 (LH/SH)
+        WORD = 2    // 對應 funct3: 010 (LW/SW)
+    };
+
+    // ALU 操作類型 (解碼器給 ALU Control 的訊號)
+    enum class ALU_OP_TYPE : uint8_t {
+        MEMORY_REF = 0, // Load/Store (Bit: 00)
+        BRANCH     = 1, // Branch (Bit: 01)
+        R_TYPE     = 2, // R-Type (Bit: 10)
+        I_TYPE     = 3  // I-Type (Bit: 11)
+    };
+
+    struct ExecuteSignal {
+        bool ALUSrc;
+        bool Branch;
+        bool Jump;
+        ALU_OP_TYPE ALUOp;
+    };
+
+    struct MemorySignal {
+        bool MemRead;
+        bool MemWrite;
+        bool Signext;
+        MEM_SIZE MemSize;
+    };
+
+    struct WriteBackSignal {
         bool RegWrite;
-		bool ALUSrc;
-		bool MemRead;
-		bool MemWrite;
-		bool Branch;
-		bool Jump;
-		bool MemtoReg;
-		bool ALUOp[3];
+        bool MemToReg;
+    };
+
+
+    struct ControlSignal {
+        ExecuteSignal ex_signal;
+        MemorySignal mem_signal;
+        WriteBackSignal wb_signal;
     };
 
     // IF/ID Register
@@ -39,7 +68,7 @@ namespace RV32IM {
         std::bitset<5> RS2;
         std::bitset<3> funct3;
         std::bitset<7> funct7;
-        std::bitset<10> control_signal;
+        ControlSignal control_signal;
         // ControlSignals ctrl;
     };
 
@@ -48,7 +77,7 @@ namespace RV32IM {
         uint32_t alu_result;
         uint32_t write_data;
         std::bitset<5>  rd;
-        std::bitset<10> control_signal;
+        ControlSignal control_signal;
         // ControlSignals ctrl;
     };
 
@@ -57,14 +86,14 @@ namespace RV32IM {
         uint32_t mem_data;
         uint32_t alu_result;
         std::bitset<5> rd;
-        std::bitset<10> control_signal;
+        ControlSignal control_signal;
         // ControlSignals ctrl;
     };
 
      struct WB_Data {
         uint32_t writeback_data;
         std::bitset<5> rd;
-        std::bitset<10> control_signal;
+        ControlSignal control_signal;
         // ControlSignals ctrl;
     };
 

@@ -29,8 +29,10 @@ namespace RV32IM {
 		 * 	- `011` : I Type
 		 * 	- Other: Reserved
 		********************************************************/
+
 		public:
-			static std::bitset <10> ControlSignal(std::bitset<7> &p_Opcode);
+			static ControlSignal Generate(std::bitset<7> &p_Opcode, std::bitset<3> &funct3);
+			static std::bitset<13> SerializeControlSignal(const ControlSignal& control);
 	};
 
 	class RegisterFile {
@@ -66,7 +68,7 @@ namespace RV32IM {
 			/********************************************************
 			 * - AluControl ( 4 bits ) - 3 bits funct3 & 1 bit funct7
 			********************************************************/
-			static int32_t Operate(std::bitset<4> p_aluOp, int32_t control_signal, int32_t p_opA, int32_t p_opB);
+			static int32_t Operate(std::bitset<4> p_aluOp, ALU_OP_TYPE control_signal, int32_t p_opA, int32_t p_opB);
 			static int32_t OpA(uint32_t PC, uint32_t src1, bool p_Selector);
 			static int32_t OpB(uint32_t src2, int32_t imm, bool p_Selector);
 			static std::bitset<4> AluControl (uint32_t p_funct3, uint32_t p_funct7);
