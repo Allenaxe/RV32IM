@@ -35,19 +35,20 @@ namespace RV32IM {
 
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
 
-        std::bitset<4> LE_ByteMask;
-        LE_ByteMask[3] = p_ByteMask[0];
-        LE_ByteMask[2] = p_ByteMask[1];
-        LE_ByteMask[1] = p_ByteMask[2];
-        LE_ByteMask[0] = p_ByteMask[3];
-
-        // Reconstruct data to write
-        std::bitset<32> OriginalData { this->Read(p_Address) };
+        // Make the data to write to algned with OrignalData
         std::bitset<32> TargetData { p_Value };
+        for (int i=0; i<4; i++){
+            if (p_ByteMask[i] == 0)
+                TargetData <<= 8;
+            else
+                break;
+        }
 
+        // Reconstruct data to write (in big endian)
+        std::bitset<32> OriginalData { EndianceToggle(this->Read(p_Address)) };         // Convert little endian to big endian
         std::bitset<32> ResultData("");
         for (int i=0; i<4; i++){
-            if (LE_ByteMask[i]) {
+            if (p_ByteMask[i]) {
                 ResultData[i]   = TargetData[i];
                 ResultData[i+1] = TargetData[i+1];
                 ResultData[i+2] = TargetData[i+2];
