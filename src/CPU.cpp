@@ -1,8 +1,8 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), ProgSeg(p_ProgSeg), Record(new Printer(Filename, ConsoleOutput)) {
-        PC = p_ProgSeg->START_ADDR;
+    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), DM(new DataMemory(p_ProgSeg)), Record(new Printer(Filename, ConsoleOutput)) {
+        PC = DM->seg->START_ADDR;
         IF_ID = {};
         ID_EX = {};
         EX_MEM = {};
@@ -10,7 +10,7 @@ namespace RV32IM {
     }
     void CPU::Fetch() {
         MAR = PC;
-        MDR = InstrMem.FetchInstr(ProgSeg, MAR);
+        MDR = InstrMem.FetchInstr(DM->seg, MAR);
         IR = MDR;
         PC += 4;
     }
@@ -49,13 +49,9 @@ namespace RV32IM {
         MEM_SIZE MemSize = p_MemoryInput.mem_ctrl.MemSize;
         // uint32_t Imm = p_MemoryInput.rd;
 
-        RV32IM::LoadStoreUnit LSU;
-        std::tuple<uint32_t, std::bitset<4>> AddrPack = LSU.DecodeAddr(p_MemoryInput.alu_result, MemSize);
+        std::tuple<uint32_t, std::bitset<4>> AddrPack = LoadStoreUnit::DecodeAddr(p_MemoryInput.alu_result, MemSize);
 
-
-        DataMemory DM(ProgSeg);
-        std::optional<uint32_t> mem_data = DM.Operate(MemRW, SignExt, std::get<1>(AddrPack), std::get<0>(AddrPack), p_MemoryInput.write_data);
-
+        std::optional<uint32_t> mem_data = DM->Operate(MemRW, SignExt, std::get<1>(AddrPack), std::get<0>(AddrPack), p_MemoryInput.write_data);
 
         return MEM_WB_Data {mem_data,
                             p_MemoryInput.alu_result,
@@ -82,7 +78,7 @@ namespace RV32IM {
         while (true) {
 
             // Terminate Condition
-            if (cycle == 6) break;
+            if (cycle == 10) break;
 
             // ---------------------------------------------
             // Fetch (IF) Stage
@@ -134,5 +130,6 @@ namespace RV32IM {
 
         // After Loop
         Record->PrintTrace();
+        Record->PrintRegisters(RF);
     }
 }

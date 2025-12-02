@@ -3,6 +3,7 @@
 #include <variant>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <vector>
 #include "Structure.h"
 #include "Component.h"
@@ -39,6 +40,8 @@ namespace RV32IM {
             void PrintState(std::ostream& os, const WB_Data& out);
 
             void WriteRaw(const std::string& message);
+
+            static void PrintRegisters(RegisterFile* RF);
     };
 
 }
