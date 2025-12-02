@@ -3,7 +3,7 @@
 # ==========================
 
 CXX       := g++
-CXXFLAGS  := -std=c++17 -Wall -Wextra -O2 -Iinclude -MMD -MP
+CXXFLAGS  := -std=c++20 -Wall -Wextra -O2 -Iinclude -MMD -MP
 
 # Project structure
 TARGET    := cpu_simulator

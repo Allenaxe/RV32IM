@@ -1,5 +1,6 @@
 #include "Memory.h"
 #include <iostream>
+#include "Exception.h"
 
 namespace RV32IM {
     std::vector<uint32_t> MainMemory::Storage;
@@ -28,6 +29,13 @@ namespace RV32IM {
     }
 
     uint32_t Segmentation::Read (uint32_t p_Address) {
+
+        // Check if target address is readable
+        if (p_Address < START_ADDR || p_Address > END_ADDR) {
+            std::string message = std::format("This address {} is not readable.", p_Address);
+            throw SegmentationError(message);
+        }
+
         uint32_t ArrayOffset = AddrTranslate(p_Address);
         return Storage[ArrayOffset];
     }
