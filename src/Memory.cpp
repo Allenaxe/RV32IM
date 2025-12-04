@@ -3,10 +3,10 @@
 #include "Exception.h"
 
 namespace RV32IM {
-    std::vector<uint32_t> MainMemory::Storage;
+    std::vector<uint8_t> MainMemory::Storage;
 
     MainMemory::MainMemory() {
-        const size_t SIZE = (PHY_HIGH_ADDR - PHY_LOW_ADDR) / sizeof(uint32_t);
+        const size_t SIZE = (PHY_HIGH_ADDR - PHY_LOW_ADDR) / sizeof(uint8_t);
         Storage.resize(SIZE, 0);
     }
 
@@ -24,31 +24,36 @@ namespace RV32IM {
           END_ADDR(p_endAddr) {}
 
     // Helper function: translate address format to array offset
-    uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
-        return (p_Address - START_ADDR) / sizeof(uint32_t);
-    }
+    // uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
+    //     return (p_Address - START_ADDR) / sizeof(uint8_t);
+    // }
 
     uint32_t Segmentation::Read (uint32_t p_Address) {
 
         // Check if target address is readable
         if (p_Address < START_ADDR || p_Address > END_ADDR) {
-            std::string message = std::format("This address {} is not readable.", p_Address);
+            // std::string message = std::format("This address {} is not readable.", p_Address);
+            std::string message;
             throw SegmentationError(message);
         }
 
-        uint32_t ArrayOffset = AddrTranslate(p_Address);
-        return Storage[ArrayOffset];
+        // uint32_t ArrayOffset = AddrTranslate(p_Address);
+
+        const uint8_t* mem = &Storage[p_Address];
+
+        return (static_cast<uint32_t>(mem[0]) << 0)  |
+               (static_cast<uint32_t>(mem[1]) << 8)  |
+               (static_cast<uint32_t>(mem[2]) << 16) |
+               (static_cast<uint32_t>(mem[3]) << 24) ;
     }
 
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
-        uint32_t addr = AddrTranslate(p_Address);
-        uint8_t* mem = reinterpret_cast<uint8_t*>(&Storage[addr]);
-        const uint8_t* src = reinterpret_cast<const uint8_t*>(&p_Value);
+        // uint32_t addr = AddrTranslate(p_Address);
+        uint8_t* mem = &Storage[p_Address];
 
-        for(int i = 0; i < 4; ++i) {
-            if(p_ByteMask[i]) {
-                mem[i] = src[i];
-            }
-        }
+        if(p_ByteMask[0]) mem[0] = (p_Value >> 0)  & 0xFF;
+        if(p_ByteMask[1]) mem[1] = (p_Value >> 8)  & 0xFF;
+        if(p_ByteMask[2]) mem[2] = (p_Value >> 16) & 0xFF;
+        if(p_ByteMask[3]) mem[3] = (p_Value >> 24) & 0xFF;
     };
 }

@@ -41,7 +41,7 @@ namespace RV32IM {
 
             void WriteRaw(const std::string& message);
 
-            static void PrintRegisters(RegisterFile* RF);
+            void PrintRegisters(RegisterFile* RF);
     };
 
 }

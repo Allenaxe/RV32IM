@@ -71,7 +71,7 @@ namespace RV32IM {
     }
 
     void Printer::PrintRegisters (RegisterFile* RF) {
-
+        std::ostringstream oss;
         const std::string regNames[32] = {
             "x0/zero", "x1/ra", "x2/sp", "x3/gp", "x4/tp", "x5/t0", "x6/t1", "x7/t2",
             "x8/s0", "x9/s1", "x10/a0", "x11/a1", "x12/a2", "x13/a3", "x14/a4", "x15/a5",
@@ -79,25 +79,26 @@ namespace RV32IM {
             "x24/s8", "x25/s9", "x26/s10", "x27/s11", "x28/t3", "x29/t4", "x30/t5", "x31/t6"
         };
 
-        std::cout << "-------------------------------------------------------------\n";
-        std::cout << "| Register |   Hex Value  |   Decimal Value  |\n";
-        std::cout << "-------------------------------------------------------------\n";
+        oss << "--------------------------------------------\n";
+        oss << "| Register |  Hex Value  |  Decimal Value  |\n";
+        oss << "--------------------------------------------\n";
         
         for(uint8_t i = 0; i < 32; i = i + 2) {
 
             RegisterFileRead RF_read = RF->Read(i, i + 1);
 
-            std::cout << "| " 
-                    << std::setw(8) << regNames[i] << " | 0x" 
+            oss << "| " 
+                    << std::setw(8) << regNames[i] << " |  0x" 
                     << std::setw(8) << std::setfill('0') << std::hex << RF_read.rs1 << std::dec
                     << " | " << std::setw(15) << std::setfill(' ') << RF_read.rs1 << " |\n";
 
-            std::cout << "| " 
-                    << std::setw(8) << regNames[i+1] << " | 0x" 
+            oss << "| " 
+                    << std::setw(8) << regNames[i+1] << " |  0x" 
                     << std::setw(8) << std::setfill('0') << std::hex << RF_read.rs2 << std::dec
                     << " | " << std::setw(15) << std::setfill(' ') << RF_read.rs2 << " |\n";
         }
-        std::cout << "-------------------------------------------------------------\n";
+        oss << "--------------------------------------------\n";
+        WriteRaw(oss.str());
     }
 
     void Printer::PrintTrace () {

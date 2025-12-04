@@ -6,7 +6,7 @@
 #include <vector>
 #include <memory>
 #include <bitset>
-#include <format>
+// #include <format>
 
 namespace RV32IM {
 
@@ -18,7 +18,7 @@ namespace RV32IM {
             const uint32_t PHY_HIGH_ADDR = 0x0000'5000;
 
         protected:
-            static std::vector<uint32_t> Storage;           // shared memory
+            static std::vector<uint8_t> Storage;           // shared memory
 
         public:
             MainMemory ();
