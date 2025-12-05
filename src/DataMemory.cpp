@@ -1,6 +1,7 @@
 #include "DataMemory.h"
 
 namespace RV32IM {
+
     DataMemory::DataMemory (std::unique_ptr<Segmentation>& p_Seg) : seg(std::move(p_Seg)) {}
 
     std::optional<uint32_t> DataMemory::Operate (MEM_RW p_MemRW, bool p_SignExt, std::bitset<4> p_ByteMask, uint32_t p_Aligned4_Addr, int32_t p_Imm){
@@ -60,4 +61,5 @@ namespace RV32IM {
 
         return TrailingZero;
     }
+
 }

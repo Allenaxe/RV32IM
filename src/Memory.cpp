@@ -1,5 +1,4 @@
 #include "Memory.h"
-#include <iostream>
 #include "Exception.h"
 
 namespace RV32IM {

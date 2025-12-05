@@ -33,6 +33,7 @@ namespace RV32IM {
             const std::string ExceptionName = "SegmentationError";
             SegmentationError (std::string _message);
     };
+
 }
 
 #endif

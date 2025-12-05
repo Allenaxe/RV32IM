@@ -21,4 +21,5 @@ namespace RV32IM {
 
     // SegmentationError
     SegmentationError::SegmentationError (std::string _message) : BaseError(_message) {};
+
 }

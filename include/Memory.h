@@ -1,5 +1,5 @@
-#ifndef CPU_MEMORY
-#define CPU_MEMORY
+#ifndef MEMORY_H
+#define MEMORY_H
 
 #include <cstdint>
 #include <cstddef>
@@ -14,11 +14,11 @@ namespace RV32IM {
 
     class MainMemory {
         private:
-            const uint32_t PHY_LOW_ADDR = 0x0000'0000;
+            const uint32_t PHY_LOW_ADDR  = 0x0000'0000;
             const uint32_t PHY_HIGH_ADDR = 0x0000'5000;
 
         protected:
-            static std::vector<uint8_t> Storage;           // shared memory
+            static std::vector<uint8_t> Storage;           // Shared memory
 
         public:
             MainMemory ();
@@ -43,7 +43,9 @@ namespace RV32IM {
 
             Segmentation(uint32_t p_startAddr, uint32_t p_endAddr, uint32_t p_textLength);
             uint32_t Read (const uint32_t p_Address);
-            void Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask = std::bitset<4>("1111"));
+            void Write (const uint32_t& p_Address,
+                        const uint32_t& p_Value,
+                        std::bitset<4> p_ByteMask = std::bitset<4>("1111"));
     };
 
 }

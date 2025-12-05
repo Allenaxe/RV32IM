@@ -1,5 +1,5 @@
-#ifndef CPU_COMPONENT
-#define CPU_COMPONENT
+#ifndef COMPONENT_H
+#define COMPONENT_H
 
 #include <cstdint>
 #include <bitset>
