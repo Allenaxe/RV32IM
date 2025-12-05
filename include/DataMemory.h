@@ -27,7 +27,7 @@ namespace RV32IM {
         public:
             DataMemory (std::unique_ptr<Segmentation>& p_Seg);
             std::unique_ptr<Segmentation> seg;
-            std::optional<uint32_t> Operate (MemRW_t MemRW, bool SignExt, std::bitset<4> ByteMask, uint32_t p_AlignedAddr, int32_t p_Imm);
+            std::optional<uint32_t> Operate (MEM_RW MemRW, bool SignExt, std::bitset<4> ByteMask, uint32_t p_AlignedAddr, int32_t p_Imm);
     };
 
 }

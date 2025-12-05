@@ -1,11 +1,12 @@
 #include "Memory.h"
+#include <iostream>
 #include "Exception.h"
 
 namespace RV32IM {
-    std::vector<uint32_t> MainMemory::Storage;
+    std::vector<uint8_t> MainMemory::Storage;
 
     MainMemory::MainMemory() {
-        const size_t SIZE = (PHY_HIGH_ADDR - PHY_LOW_ADDR) / sizeof(uint32_t);
+        const size_t SIZE = (PHY_HIGH_ADDR - PHY_LOW_ADDR) / sizeof(uint8_t);
         Storage.resize(SIZE, 0);
     }
 
@@ -23,68 +24,36 @@ namespace RV32IM {
           END_ADDR(p_endAddr) {}
 
     // Helper function: translate address format to array offset
-    uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
-        return (p_Address - START_ADDR) / sizeof(uint32_t);
-    }
+    // uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
+    //     return (p_Address - START_ADDR) / sizeof(uint8_t);
+    // }
 
     uint32_t Segmentation::Read (uint32_t p_Address) {
 
         // Check if target address is readable
         if (p_Address < START_ADDR || p_Address > END_ADDR) {
-            std::string message = std::format("This address {} is not readable.", p_Address);
+            // std::string message = std::format("This address {} is not readable.", p_Address);
+            std::string message;
             throw SegmentationError(message);
         }
 
-        uint32_t ArrayOffset = AddrTranslate(p_Address);
-        uint32_t data = Storage[ArrayOffset];       // Read in little endian
+        // uint32_t ArrayOffset = AddrTranslate(p_Address);
 
-        return EndianceToggle(data);                // Convert to big endian
+        const uint8_t* mem = &Storage[p_Address];
+
+        return (static_cast<uint32_t>(mem[0]) << 0)  |
+               (static_cast<uint32_t>(mem[1]) << 8)  |
+               (static_cast<uint32_t>(mem[2]) << 16) |
+               (static_cast<uint32_t>(mem[3]) << 24) ;
     }
 
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
+        // uint32_t addr = AddrTranslate(p_Address);
+        uint8_t* mem = &Storage[p_Address];
 
-        // Check if target address is writable
-        if (p_Address < HEAP_ADDR || p_Address > END_ADDR) {
-            std::string message = std::format("This address {} is not writable.", p_Address);
-            throw SegmentationError(message);
-        }
-
-        // Make the data to write to algned with OrignalData
-        std::bitset<32> TargetData { p_Value };
-        for (int i=0; i<4; i++){
-            if (p_ByteMask[i] == 0)
-                TargetData <<= 8;
-            else
-                break;
-        }
-
-        // Reconstruct data to write (in big endian)
-        std::bitset<32> OriginalData { EndianceToggle(this->Read(p_Address)) };         // Convert little endian to big endian
-        std::bitset<32> ResultData("");
-        for (int i=0; i<4; i++){
-            if (p_ByteMask[i]) {
-                ResultData[i]   = TargetData[i];
-                ResultData[i+1] = TargetData[i+1];
-                ResultData[i+2] = TargetData[i+2];
-                ResultData[i+3] = TargetData[i+3];
-            }
-            else {
-                ResultData[i]   = OriginalData[i];
-                ResultData[i+1] = OriginalData[i+1];
-                ResultData[i+2] = OriginalData[i+2];
-                ResultData[i+3] = OriginalData[i+3];
-            }
-        }
-
-        uint32_t ArrayOffset = AddrTranslate(p_Address);
-        Storage[ArrayOffset] = EndianceToggle(ResultData.to_ulong());           // Convert to little-endian
+        if(p_ByteMask[0]) mem[0] = (p_Value >> 0)  & 0xFF;
+        if(p_ByteMask[1]) mem[1] = (p_Value >> 8)  & 0xFF;
+        if(p_ByteMask[2]) mem[2] = (p_Value >> 16) & 0xFF;
+        if(p_ByteMask[3]) mem[3] = (p_Value >> 24) & 0xFF;
     };
-
-    // Convert between big endian and little endian
-    uint32_t Segmentation::EndianceToggle (uint32_t p_Data) {
-        return ((p_Data & 0x0000'00FF) << 24) |
-               ((p_Data & 0x0000'FF00) <<  8) |
-               ((p_Data & 0x00FF'0000) >>  8) |
-               ((p_Data & 0xFF00'0000) >> 24);
-    }
 }

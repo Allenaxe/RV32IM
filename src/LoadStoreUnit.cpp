@@ -1,8 +1,6 @@
 #include "LoadStoreUnit.h"
 
 namespace RV32IM {
-    LoadStoreUnit::LoadStoreUnit () {}
-
     std::tuple<uint32_t, std::bitset<4>> LoadStoreUnit::DecodeAddr(uint32_t p_Addr, MEM_SIZE MemSize) {
         std::bitset<4> ByteMask;
 

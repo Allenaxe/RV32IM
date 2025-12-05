@@ -3,15 +3,15 @@
 namespace RV32IM {
     DataMemory::DataMemory (std::unique_ptr<Segmentation>& p_Seg) : seg(std::move(p_Seg)) {}
 
-    std::optional<uint32_t> DataMemory::Operate (MemRW_t p_MemRW, bool p_SignExt, std::bitset<4> p_ByteMask, uint32_t p_Aligned4_Addr, int32_t p_Imm){
+    std::optional<uint32_t> DataMemory::Operate (MEM_RW p_MemRW, bool p_SignExt, std::bitset<4> p_ByteMask, uint32_t p_Aligned4_Addr, int32_t p_Imm){
         switch (p_MemRW) {
-            case MemRW_t::NOP :
+            case MEM_RW::NOP :
                 return std::nullopt;
 
-            case MemRW_t::READ :
+            case MEM_RW::READ :
                 return Load(p_Aligned4_Addr, p_ByteMask, p_SignExt);
 
-            case MemRW_t::WRITE :
+            case MEM_RW::WRITE :
                 return Store(p_Aligned4_Addr, p_ByteMask, p_Imm);
         }
 

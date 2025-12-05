@@ -10,49 +10,46 @@ namespace RV32IM {
             Register[rd] = wd;
     }
 
-    int32_t ForwardingUnit::ALUMux(std::bitset<5> p_rs, int32_t p_op, 
+    uint32_t ForwardingUnit::ALUMux(std::bitset<5> p_rs, uint32_t p_op, 
             const EX_MEM_Data &EX_MEM, const MEM_WB_Data &MEM_WB) {
         // forwarding op
-        std::tuple<bool, bool> forwarding_op = ForwardingUnit::ALUForwardingSignal(
+        std::bitset<2> forwarding_op = ForwardingUnit::ALUForwardingSignal(
             p_rs.to_ulong(),
-            EX_MEM.rd, EX_MEM.control_signal.ex_signal.ALUSrc,
-            MEM_WB.rd, MEM_WB.control_signal.ex_signal.ALUSrc
+            EX_MEM.rd, EX_MEM.wb_ctrl.RegWrite,
+            MEM_WB.rd, MEM_WB.wb_ctrl.RegWrite
         );
         // if ex hazard
-        if(std::get<0>(forwarding_op)) {
+        if(forwarding_op == 0b10) {
             p_op = EX_MEM.alu_result;
         }
         // if mem hazard
-        else if(std::get<1>(forwarding_op)) {
-            p_op = MEM_WB.control_signal.wb_signal.MemToReg ? // MemtoReg: select data from memory or ALU result
-                MEM_WB.mem_data : MEM_WB.alu_result;
+        else if(forwarding_op == 0b01) {
+            p_op = MEM_WB.wb_ctrl.MemToReg ? MEM_WB.mem_data.value_or(0) : MEM_WB.alu_result;
         }
+
         return p_op;
     }
 
-    std::tuple<bool, bool> ForwardingUnit::ALUForwardingSignal (
+    std::bitset<2> ForwardingUnit::ALUForwardingSignal (
         uint8_t EX_rs,
         std::bitset<5> p_EX_MEM_rd, bool p_EX_MEM_RegWrite,
         std::bitset<5> p_MEM_WB_rd, bool p_MEM_WB_RegWrite
     ) {
-        bool forward_ex = false;
-        bool forward_wb = false;
-
         // EX hazard
         if (p_EX_MEM_RegWrite && 
             (p_EX_MEM_rd.to_ulong() != 0) && 
             (p_EX_MEM_rd.to_ulong() == EX_rs)) {
-            forward_ex = true;
+            return std::bitset<2> {"10"};
         }
 
         // MEM hazard
         else if (p_MEM_WB_RegWrite && 
             (p_MEM_WB_rd.to_ulong() != 0) && 
             (p_MEM_WB_rd.to_ulong() == EX_rs)) {
-            forward_wb = true;
+            return std::bitset<2> {"01"};
         }
 
-        return std::make_tuple(forward_ex, forward_wb);
+        return std::bitset<2> {"00"};
     }
 
     ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3) {
@@ -70,7 +67,7 @@ namespace RV32IM {
         bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJType;
         bool ALUSrc = isIType | isLOAD | isSType;
 
-        MemRW_t MemRW =  static_cast<MemRW_t>((isLOAD << 1) & isSType);
+        MEM_RW MemRW =  static_cast<MEM_RW>((isLOAD << 1) & isSType);
         
         bool Branch = isBType;
         bool Jump = isJType | isJALR;
@@ -87,52 +84,6 @@ namespace RV32IM {
             MemorySignal { MemRW, SignExt, MemSize },
             WriteBackSignal { RegWrite, MemtoReg }
         };
-    }
-
-    std::bitset<13> ControlUnit::SerializeControlSignal(const ControlSignal& control) {
-        std::bitset<13> output;
-        size_t current_bit = 0; // 從 LSB (0) 開始計數
-
-        // --- 寫回階段 (WB) ---
-        // RegWrite [0]
-        output[current_bit++] = control.wb_signal.RegWrite;
-        
-        // MemToReg [1]
-        output[current_bit++] = control.wb_signal.MemToReg;
-
-        // --- 記憶體階段 (MEM) ---
-        // MemWrite [3:2]
-        uint8_t mem_rw_val = static_cast<uint8_t>(control.mem_signal.MemRW);
-        output[current_bit++] = mem_rw_val & 0b01;        // Read
-        output[current_bit++] = mem_rw_val & 0b10;        // Write
-        
-        // SignExt [4]
-        output[current_bit++] = control.mem_signal.SignExt;
-
-        // MemSize [6:5] - 2 bits (使用 to_ulong 取得數值)
-        // 這裡需要將 Enum 數值按位元寫入
-        uint8_t mem_size_val = static_cast<uint8_t>(control.mem_signal.MemSize);
-        for (int i = 0; i < 2; ++i) {
-            output[current_bit++] = (mem_size_val >> i) & 1;
-        }
-
-        // --- 執行階段 (EX) ---
-        // ALUSrc [7]
-        output[current_bit++] = control.ex_signal.ALUSrc;
-        
-        // Branch [8]
-        output[current_bit++] = control.ex_signal.Branch;
-        
-        // Jump [9]
-        output[current_bit++] = control.ex_signal.Jump;
-
-        // ALUOp [12:10] - 3 bits (使用 to_ulong 取得數值)
-        uint8_t alu_op_val = static_cast<uint8_t>(control.ex_signal.ALUOp);
-        for (int i = 0; i < 3; ++i) {
-            output[current_bit++] = (alu_op_val >> i) & 1;
-        }
-
-        return output;
     }
 
     uint32_t ImmediateGenerator::DecodeType (std::bitset<7> p_Opcode) {

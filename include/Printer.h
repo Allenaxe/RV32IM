@@ -3,11 +3,16 @@
 #include <variant>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <vector>
 #include "Structure.h"
 #include "Component.h"
 
 namespace RV32IM {
+
+    std::ostream& operator<<(std::ostream& os, MEM_RW size);
+    std::ostream& operator<<(std::ostream& os, MEM_SIZE size);
+    std::ostream& operator<<(std::ostream& os, ALU_OP_TYPE t);
 
     class Printer {
         private:
@@ -35,6 +40,8 @@ namespace RV32IM {
             void PrintState(std::ostream& os, const WB_Data& out);
 
             void WriteRaw(const std::string& message);
+
+            void PrintRegisters(RegisterFile* RF);
     };
 
 }

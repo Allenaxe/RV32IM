@@ -12,7 +12,7 @@ namespace RV32IM {
         uint32_t rs2;
     };
 
-    enum class MemRW_t : uint8_t {
+    enum class MEM_RW : uint8_t {
         NOP   = 0,  // Do nothing
         READ  = 1,  // Able to read
         WRITE = 2,  // Able to write
@@ -40,7 +40,7 @@ namespace RV32IM {
     };
 
     struct MemorySignal {
-        MemRW_t MemRW;
+        MEM_RW MemRW;
         bool SignExt;
         MEM_SIZE MemSize;
     };
@@ -50,11 +50,10 @@ namespace RV32IM {
         bool MemToReg;
     };
 
-
     struct ControlSignal {
-        ExecuteSignal ex_signal;
-        MemorySignal mem_signal;
-        WriteBackSignal wb_signal;
+        ExecuteSignal ex_ctrl;
+        MemorySignal mem_ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
     // IF/ID Register
@@ -73,8 +72,9 @@ namespace RV32IM {
         std::bitset<5> RS2;
         std::bitset<3> funct3;
         std::bitset<7> funct7;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
+        ExecuteSignal ex_ctrl;
+        MemorySignal mem_ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
     // EX/MEM Register
@@ -82,8 +82,8 @@ namespace RV32IM {
         uint32_t alu_result;
         uint32_t write_data;
         std::bitset<5>  rd;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
+        MemorySignal mem_ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
     // MEM/WB Register
@@ -91,15 +91,12 @@ namespace RV32IM {
         std::optional<uint32_t> mem_data;
         uint32_t alu_result;
         std::bitset<5> rd;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
+        WriteBackSignal wb_ctrl;
     };
 
      struct WB_Data {
         uint32_t writeback_data;
         std::bitset<5> rd;
-        ControlSignal control_signal;
-        // ControlSignals ctrl;
     };
 
     struct CycleSnapshot {

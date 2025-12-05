@@ -1,8 +1,8 @@
 #include "CPU.h"
 
 namespace RV32IM {
-    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): ProgSeg(p_ProgSeg), RF(new RegisterFile()), Record(new Printer(Filename, ConsoleOutput)) {
-        PC = p_ProgSeg->START_ADDR;
+    CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), DM(new DataMemory(p_ProgSeg)), Record(new Printer(Filename, ConsoleOutput)) {
+        PC = DM->seg->START_ADDR;
         IF_ID = {};
         ID_EX = {};
         EX_MEM = {};
@@ -10,7 +10,7 @@ namespace RV32IM {
     }
     void CPU::Fetch() {
         MAR = PC;
-        MDR = InstrMem.FetchInstr(ProgSeg, MAR);
+        MDR = InstrMem.FetchInstr(DM->seg, MAR);
         IR = MDR;
         PC += 4;
     }
@@ -28,51 +28,46 @@ namespace RV32IM {
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
 
-        return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, rs1, rs2, funct3, funct7, control_signal };
+        return ID_EX_Data { RF_read.rs1, RF_read.rs2, imm, rd, rs1, rs2, funct3, funct7, control_signal.ex_ctrl, control_signal.mem_ctrl, control_signal.wb_ctrl };
     }
 
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
-        int32_t opA = ALU::OpA(PC, p_ExecuteInput.rs1, (p_ExecuteInput.control_signal.ex_signal.Branch | p_ExecuteInput.control_signal.ex_signal.Jump));
-        int32_t opB = ALU::OpB(p_ExecuteInput.rs2, p_ExecuteInput.imm, p_ExecuteInput.control_signal.ex_signal.ALUSrc);
-        opA = ForwardingUnit::ALUMux(p_ExecuteInput.RS1, opA, EX_MEM.Read(), MEM_WB.Read());
-        opB = ForwardingUnit::ALUMux(p_ExecuteInput.RS2, opB, EX_MEM.Read(), MEM_WB.Read());
-
+        uint32_t rs1 = ForwardingUnit::ALUMux(p_ExecuteInput.RS1, p_ExecuteInput.rs1, EX_MEM.Read(), MEM_WB.Read());
+        uint32_t rs2 = ForwardingUnit::ALUMux(p_ExecuteInput.RS2, p_ExecuteInput.rs2, EX_MEM.Read(), MEM_WB.Read());
+        int32_t opA = ALU::OpA(PC, rs1, (p_ExecuteInput.ex_ctrl.Branch | p_ExecuteInput.ex_ctrl.Jump));
+        int32_t opB = ALU::OpB(rs2, p_ExecuteInput.imm, p_ExecuteInput.ex_ctrl.ALUSrc);
         std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
-        ALU_OP_TYPE control_signal = p_ExecuteInput.control_signal.ex_signal.ALUOp;
+        ALU_OP_TYPE control_signal = p_ExecuteInput.ex_ctrl.ALUOp;
         int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
-        
-        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd, p_ExecuteInput.control_signal};
+
+        return EX_MEM_Data {static_cast<uint32_t>(alu_output), p_ExecuteInput.rs2, p_ExecuteInput.rd, p_ExecuteInput.mem_ctrl, p_ExecuteInput.wb_ctrl };
     }
 
     MEM_WB_Data CPU::Memory(EX_MEM_Data& p_MemoryInput) {
-        MemRW_t MemRW = p_MemoryInput.control_signal.mem_signal.MemRW;
-        bool SignExt = p_MemoryInput.control_signal.mem_signal.SignExt;
-        MEM_SIZE MemSize = p_MemoryInput.control_signal.mem_signal.MemSize;
+        MEM_RW MemRW = p_MemoryInput.mem_ctrl.MemRW;
+        bool SignExt = p_MemoryInput.mem_ctrl.SignExt;
+        MEM_SIZE MemSize = p_MemoryInput.mem_ctrl.MemSize;
         // uint32_t Imm = p_MemoryInput.rd;
 
-        RV32IM::LoadStoreUnit LSU;
-        std::tuple<uint32_t, std::bitset<4>> AddrPack = LSU.DecodeAddr(p_MemoryInput.alu_result, MemSize);
+        std::tuple<uint32_t, std::bitset<4>> AddrPack = LoadStoreUnit::DecodeAddr(p_MemoryInput.alu_result, MemSize);
 
-
-        DataMemory DM(ProgSeg);
-        std::optional<uint32_t> mem_data = DM.Operate(MemRW, SignExt, std::get<1>(AddrPack), std::get<0>(AddrPack), p_MemoryInput.write_data);
-
+        std::optional<uint32_t> mem_data = DM->Operate(MemRW, SignExt, std::get<1>(AddrPack), std::get<0>(AddrPack), p_MemoryInput.write_data);
 
         return MEM_WB_Data {mem_data,
                             p_MemoryInput.alu_result,
                             p_MemoryInput.rd,
-                            p_MemoryInput.control_signal
+                            p_MemoryInput.wb_ctrl
                             };
     }
 
     WB_Data CPU::WriteBack(MEM_WB_Data& p_WriteBackInput) {
-        uint32_t writeback_data = p_WriteBackInput.control_signal.wb_signal.MemToReg ? // MemtoReg: select data from memory or ALU result
-            p_WriteBackInput.mem_data : p_WriteBackInput.alu_result;
+        uint32_t writeback_data = p_WriteBackInput.wb_ctrl.MemToReg ? // MemtoReg: select data from memory or ALU result
+            p_WriteBackInput.mem_data.value_or(0) : p_WriteBackInput.alu_result;
 
-        if(p_WriteBackInput.control_signal.wb_signal.RegWrite) // RegWrite: write back to Register File
-            RF->Write(p_WriteBackInput.rd.to_ulong(), writeback_data, p_WriteBackInput.control_signal.wb_signal.RegWrite);
+        if(p_WriteBackInput.wb_ctrl.RegWrite) // RegWrite: write back to Register File
+            RF->Write(p_WriteBackInput.rd.to_ulong(), writeback_data, p_WriteBackInput.wb_ctrl.RegWrite);
 
-        return WB_Data {writeback_data, p_WriteBackInput.rd, p_WriteBackInput.control_signal};
+        return WB_Data { writeback_data, p_WriteBackInput.rd };
     }
 
     void CPU::Run() {
@@ -83,7 +78,7 @@ namespace RV32IM {
         while (true) {
 
             // Terminate Condition
-            if (cycle == 6) break;
+            if (cycle == 10) break;
 
             // ---------------------------------------------
             // Fetch (IF) Stage
@@ -135,5 +130,6 @@ namespace RV32IM {
 
         // After Loop
         Record->PrintTrace();
+        Record->PrintRegisters(RF);
     }
 }

@@ -38,7 +38,7 @@ namespace RV32IM {
             // bool m_Halt;
 
             // Segmentation
-            std::unique_ptr<Segmentation>& ProgSeg;                // Program Segmentation
+            DataMemory* DM;             // Program Segmentation
 
             // Component
             InstructionMemory InstrMem;

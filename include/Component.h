@@ -40,7 +40,6 @@ namespace RV32IM {
 
 		public:
 			static ControlSignal Generate(std::bitset<7> &p_Opcode, std::bitset<3> &funct3);
-			static std::bitset<13> SerializeControlSignal(const ControlSignal& control);
 	};
 
 	class RegisterFile {
@@ -53,10 +52,10 @@ namespace RV32IM {
 
 	class ForwardingUnit {
 		public:
-			static int32_t ALUMux(std::bitset<5> p_rs, int32_t p_op, 
+			static uint32_t ALUMux(std::bitset<5> p_rs, uint32_t p_op, 
 				const EX_MEM_Data &EX_MEM, const MEM_WB_Data &MEM_WB);
 		private:
-			static std::tuple<bool, bool> ALUForwardingSignal(
+			static std::bitset<2> ALUForwardingSignal(
 				uint8_t EX_rs,
 				std::bitset<5> p_EX_MEM_rd, bool p_EX_MEM_RegWrite,
 				std::bitset<5> p_MEM_WB_rd, bool p_MEM_WB_RegWrite
