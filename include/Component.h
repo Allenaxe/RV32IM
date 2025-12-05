@@ -50,18 +50,6 @@ namespace RV32IM {
             void Write(uint8_t rd, uint32_t wd, bool we);
     };
 
-    class ForwardingUnit {
-        public:
-            static uint32_t ALUMux(std::bitset<5> p_rs, uint32_t p_op,
-                const EX_MEM_Data &EX_MEM, const MEM_WB_Data &MEM_WB);
-        private:
-            static std::bitset<2> ALUForwardingSignal(
-                uint8_t EX_rs,
-                std::bitset<5> p_EX_MEM_rd, bool p_EX_MEM_RegWrite,
-                std::bitset<5> p_MEM_WB_rd, bool p_MEM_WB_RegWrite
-            );
-    };
-
     class ImmediateGenerator {
         public:
             static uint32_t Generate(uint32_t &p_Instr);
@@ -70,19 +58,6 @@ namespace RV32IM {
             static uint32_t Extend(uint32_t p_Immediate, uint32_t p_Extend);
     };
 
-    class ALU {
-        public:
-            /********************************************************
-             * - AluControl ( 4 bits ) - 3 bits funct3 & 1 bit funct7
-            ********************************************************/
-            static int32_t Operate(std::bitset<4> p_aluOp, ALU_OP_TYPE control_signal, int32_t p_opA, int32_t p_opB);
-            static int32_t OpA(uint32_t PC, uint32_t src1, bool p_Selector);
-            static int32_t OpB(uint32_t src2, int32_t imm, bool p_Selector);
-            static std::bitset<4> AluControl (uint32_t p_funct3, uint32_t p_funct7);
-
-        private:
-            static int32_t Adder(uint32_t src1, uint32_t src2, bool cin, bool &carry);
-    };
 }
 
 #endif

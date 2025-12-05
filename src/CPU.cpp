@@ -1,4 +1,6 @@
 #include "CPU.h"
+#include "ForwardingUnit.h"
+#include "ALU.h"
 
 namespace RV32IM {
     CPU::CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput): RF(new RegisterFile()), DM(new DataMemory(p_ProgSeg)), Record(new Printer(Filename, ConsoleOutput)) {
