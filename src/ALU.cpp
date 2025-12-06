@@ -57,6 +57,15 @@ namespace RV32IM {
                 return p_OpA + p_OpB;
             }
 
+            // LUI
+            case ALU_OP_TYPE::LUI: {
+                return p_OpB;
+            }
+            // AUIPC
+            case ALU_OP_TYPE::AUIPC: {
+                return p_OpA + p_OpB;
+            }
+
             // Branch
             case ALU_OP_TYPE::BRANCH: {
                 // return PC + imm

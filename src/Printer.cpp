@@ -23,9 +23,11 @@ namespace RV32IM {
     std::ostream& operator<< (std::ostream& os, ALU_OP_TYPE t) {
         switch(t) {
             case ALU_OP_TYPE::MEMORY_REF: os << "MEMORY_REF"; break;
-            case ALU_OP_TYPE::BRANCH:     os << "BRANCH"; break;
-            case ALU_OP_TYPE::R_TYPE:     os << "R_TYPE"; break;
-            case ALU_OP_TYPE::I_TYPE:     os << "I_TYPE"; break;
+            case ALU_OP_TYPE::BRANCH:     os << "BRANCH";     break;
+            case ALU_OP_TYPE::R_TYPE:     os << "R_TYPE";     break;
+            case ALU_OP_TYPE::I_TYPE:     os << "I_TYPE";     break;
+            case ALU_OP_TYPE::LUI:        os << "LUI";        break;
+            case ALU_OP_TYPE::AUIPC:      os << "AUIPC";      break;
         }
         return os;
     }
@@ -33,7 +35,7 @@ namespace RV32IM {
     Printer::Printer (const std::string& Filename, bool toConsole): ConsoleOutput(toConsole) {
         LogFile.open(Filename);
         if(!LogFile.is_open()) {
-            std::cerr << "[Printer Error] 無法開啟 Log 檔案: " << Filename << '\n';
+            std::cerr << "[Printer Error] Cannot open log file: " << Filename << '\n';
         }
     }
 
