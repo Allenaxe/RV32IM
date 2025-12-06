@@ -26,6 +26,8 @@ namespace RV32IM {
             case ALU_OP_TYPE::BRANCH:     os << "BRANCH"; break;
             case ALU_OP_TYPE::R_TYPE:     os << "R_TYPE"; break;
             case ALU_OP_TYPE::I_TYPE:     os << "I_TYPE"; break;
+            case ALU_OP_TYPE::LUI:        os << "LUI"; break;
+            case ALU_OP_TYPE::AUIPC:      os << "AUIPC"; break;
         }
         return os;
     }

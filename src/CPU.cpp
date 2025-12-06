@@ -34,7 +34,7 @@ namespace RV32IM {
     EX_MEM_Data CPU::Execute(ID_EX_Data& p_ExecuteInput) {
         uint32_t rs1 = ForwardingUnit::ALUMux(p_ExecuteInput.RS1, p_ExecuteInput.rs1, EX_MEM.Read(), MEM_WB.Read());
         uint32_t rs2 = ForwardingUnit::ALUMux(p_ExecuteInput.RS2, p_ExecuteInput.rs2, EX_MEM.Read(), MEM_WB.Read());
-        int32_t opA = ALU::OpA(PC, rs1, (p_ExecuteInput.ex_ctrl.Branch | p_ExecuteInput.ex_ctrl.Jump));
+        int32_t opA = ALU::OpA(PC, rs1, (p_ExecuteInput.ex_ctrl.Branch | p_ExecuteInput.ex_ctrl.Jump | p_ExecuteInput.ex_ctrl.AUIPC));
         int32_t opB = ALU::OpB(rs2, p_ExecuteInput.imm, p_ExecuteInput.ex_ctrl.ALUSrc);
         std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
         ALU_OP_TYPE control_signal = p_ExecuteInput.ex_ctrl.ALUOp;
