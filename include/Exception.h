@@ -3,36 +3,43 @@
 
 #include <string>
 #include <format>
+#include <exception>
 
 namespace RV32IM {
 
-    class BaseError {
+    class BaseError : public std::exception {
         public:
-            const std::string ExceptionName;
+            std::string ExceptionName;
             std::string message;
 
-            BaseError (std::string _message);
-            std::string ShowMessage ();
+            BaseError (const std::string& _name, const std::string& _message);
+            const char* what() const noexcept override;
     };
 
     class ValueError : public BaseError {
         public:
-            const std::string ExceptionName = "ValeuError";
-            ValueError (std::string _message);
+            ValueError (const std::string& _message);
     };
 
     class MemoryError : public BaseError {
         public:
-            const std::string ExceptionName = "MemoryError";
-            MemoryError (std::string _message);
+            MemoryError (const std::string& _message);
     };
 
     class SegmentationError : public BaseError {
         public:
-            const std::string ExceptionName = "SegmentationError";
-            SegmentationError (std::string _message);
+            SegmentationError (const std::string& _message);
     };
 
+    class PrintError : public BaseError {
+        public:
+            PrintError (const std::string& _message);
+    };
+
+    class ArgumentError : public BaseError {
+        public:
+            ArgumentError (const std::string& _message);
+    };
 }
 
 #endif

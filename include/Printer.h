@@ -7,9 +7,11 @@
 #include <iomanip>
 #include <vector>
 #include <iostream>
+#include <format>
 
 #include "Structure.h"
 #include "Component.h"
+#include "Exception.h"
 
 namespace RV32IM {
 

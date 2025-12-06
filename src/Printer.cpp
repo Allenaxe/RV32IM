@@ -35,7 +35,8 @@ namespace RV32IM {
     Printer::Printer (const std::string& Filename, bool toConsole): ConsoleOutput(toConsole) {
         LogFile.open(Filename);
         if(!LogFile.is_open()) {
-            std::cerr << "[Printer Error] Cannot open log file: " << Filename << '\n';
+            std::string message = std::format("[Printer Error] Cannot open log file: {}", Filename);
+            throw PrintError(message);
         }
     }
 

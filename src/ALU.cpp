@@ -113,7 +113,9 @@ namespace RV32IM {
                             return p_OpA + 4;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string message = std::format("invaild [funct3]: {}", 
+                                                        std::bitset<3>((p_ALUFunct >> 1).to_ulong()).to_string());
+                        throw ValueError(message);
                         return 0;
                 }
             }
@@ -163,7 +165,9 @@ namespace RV32IM {
                         return p_OpA & p_OpB;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string message = std::format("invaild [funct3]+[funct7]: {}", 
+                                                        std::bitset<4>(p_ALUFunct.to_ulong()).to_string());
+                        throw ValueError(message);
                         return 0;
                 }
             }
@@ -215,7 +219,9 @@ namespace RV32IM {
                         return p_OpA & p_OpB;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string message = std::format("invaild [funct3]+[funct7]: {}", 
+                                                        std::bitset<4>(p_ALUFunct.to_ulong()).to_string());
+                        throw ValueError(message);
                         return 0;
                 }
             }

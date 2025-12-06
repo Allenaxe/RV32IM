@@ -6,6 +6,7 @@
 #include <bitset>
 
 #include "Structure.h"
+#include "Exception.h"
 
 namespace RV32IM {
 

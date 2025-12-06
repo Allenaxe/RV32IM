@@ -2,6 +2,7 @@
 #include "Memory.h"
 #include "Loader.h"
 #include "Exception.h"
+#include <string>
 
 int main(int argc, char* argv[]) {
 
@@ -19,8 +20,10 @@ int main(int argc, char* argv[]) {
         } else if (arg == "--no-console") {
             consoleOutput = false;
         } else {
-            std::cerr << "Unknown argument: " << arg << std::endl;
-            std::cerr << "Usage: " << argv[0] << " [-m machine_code_file] [-l log_file] [--no-console]\n";
+            // std::cerr << "Unknown argument: " << arg << std::endl;
+            // std::cerr << "Usage: " << argv[0] << " [-m machine_code_file] [-l log_file] [--no-console]\n";
+            std::string message = std::format("Unknown argument: {}\nUsage: {} [-m machine_code_file] [-l log_file] [--no-console]", arg, argv[0]);
+            throw RV32IM::ArgumentError(message);
             return 1;
         }
     }
