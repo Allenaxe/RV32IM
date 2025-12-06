@@ -2,7 +2,7 @@
 
 namespace RV32IM {
 
-    std::ostream& operator<<(std::ostream& os, MEM_RW size) {
+    std::ostream& operator<< (std::ostream& os, MEM_RW size) {
         switch(size) {
             case MEM_RW::NOP: os << "NOP"; break;
             case MEM_RW::READ: os << "READ"; break;
@@ -11,7 +11,7 @@ namespace RV32IM {
         return os;
     }
 
-    std::ostream& operator<<(std::ostream& os, MEM_SIZE size) {
+    std::ostream& operator<< (std::ostream& os, MEM_SIZE size) {
         switch(size) {
             case MEM_SIZE::BYTE: os << "BYTE"; break;
             case MEM_SIZE::HALF: os << "HALF"; break;
@@ -20,14 +20,14 @@ namespace RV32IM {
         return os;
     }
 
-    std::ostream& operator<<(std::ostream& os, ALU_OP_TYPE t) {
+    std::ostream& operator<< (std::ostream& os, ALU_OP_TYPE t) {
         switch(t) {
             case ALU_OP_TYPE::MEMORY_REF: os << "MEMORY_REF"; break;
-            case ALU_OP_TYPE::BRANCH:     os << "BRANCH"; break;
-            case ALU_OP_TYPE::R_TYPE:     os << "R_TYPE"; break;
-            case ALU_OP_TYPE::I_TYPE:     os << "I_TYPE"; break;
-            case ALU_OP_TYPE::LUI:        os << "LUI"; break;
-            case ALU_OP_TYPE::AUIPC:      os << "AUIPC"; break;
+            case ALU_OP_TYPE::BRANCH:     os << "BRANCH";     break;
+            case ALU_OP_TYPE::R_TYPE:     os << "R_TYPE";     break;
+            case ALU_OP_TYPE::I_TYPE:     os << "I_TYPE";     break;
+            case ALU_OP_TYPE::LUI:        os << "LUI";        break;
+            case ALU_OP_TYPE::AUIPC:      os << "AUIPC";      break;
         }
         return os;
     }
@@ -35,7 +35,7 @@ namespace RV32IM {
     Printer::Printer (const std::string& Filename, bool toConsole): ConsoleOutput(toConsole) {
         LogFile.open(Filename);
         if(!LogFile.is_open()) {
-            std::cerr << "[Printer Error] 無法開啟 Log 檔案: " << Filename << '\n';
+            std::cerr << "[Printer Error] Cannot open log file: " << Filename << '\n';
         }
     }
 
@@ -84,20 +84,20 @@ namespace RV32IM {
         oss << "--------------------------------------------\n";
         oss << "| Register |  Hex Value  |  Decimal Value  |\n";
         oss << "--------------------------------------------\n";
-        
+
         for(uint8_t i = 0; i < 32; i = i + 2) {
 
             RegisterFileRead RF_read = RF->Read(i, i + 1);
 
-            oss << "| " 
-                    << std::setw(8) << regNames[i] << " |  0x" 
-                    << std::setw(8) << std::setfill('0') << std::hex << RF_read.rs1 << std::dec
-                    << " | " << std::setw(15) << std::setfill(' ') << RF_read.rs1 << " |\n";
+            oss << "| "
+                    << std::setw(8) << regNames[i] << " |  0x"
+                    << std::setw(8) << std::setfill('0') << std::hex << RF_read.rs1
+                    << " | " << std::setw(15) << std::setfill(' ') << std::dec << RF_read.rs1 << " |\n";
 
-            oss << "| " 
-                    << std::setw(8) << regNames[i+1] << " |  0x" 
-                    << std::setw(8) << std::setfill('0') << std::hex << RF_read.rs2 << std::dec
-                    << " | " << std::setw(15) << std::setfill(' ') << RF_read.rs2 << " |\n";
+            oss << "| "
+                    << std::setw(8) << regNames[i+1] << " |  0x"
+                    << std::setw(8) << std::setfill('0') << std::hex << RF_read.rs2
+                    << " | " << std::setw(15) << std::setfill(' ') << std::dec << RF_read.rs2 << " |\n";
         }
         oss << "--------------------------------------------\n";
         WriteRaw(oss.str());
@@ -208,4 +208,5 @@ namespace RV32IM {
             std::cout << message;
         }
     }
+
 }

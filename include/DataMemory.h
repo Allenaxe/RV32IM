@@ -1,5 +1,5 @@
-#ifndef DATA_MEMORY
-#define DATA_MEMORY
+#ifndef DATA_MEMORY_H
+#define DATA_MEMORY_H
 
 #include <cstdint>
 #include <bitset>

@@ -1,6 +1,7 @@
 #include "LoadStoreUnit.h"
 
 namespace RV32IM {
+
     std::tuple<uint32_t, std::bitset<4>> LoadStoreUnit::DecodeAddr(uint32_t p_Addr, MEM_SIZE MemSize) {
         std::bitset<4> ByteMask;
 
@@ -54,4 +55,5 @@ namespace RV32IM {
 
         return std::make_tuple(Aligned4_Addr, ByteMask);
     }
+
 }

@@ -1,9 +1,9 @@
-#ifndef CPU_STRUCTURE
-#define CPU_STRUCTURE
-#include <iostream>
-#include <optional>
+#ifndef STRUCTURE_H
+#define STRUCTURE_H
+
 #include <cstdint>
 #include <bitset>
+#include <optional>
 
 namespace RV32IM {
 
@@ -13,25 +13,25 @@ namespace RV32IM {
     };
 
     enum class MEM_RW : uint8_t {
-        NOP   = 0,  // Do nothing
-        READ  = 1,  // Able to read
-        WRITE = 2,  // Able to write
+        NOP   = 0,              // Do nothing
+        READ  = 1,              // Able to read
+        WRITE = 2,              // Able to write
     };
 
     enum class MEM_SIZE : uint8_t {
-        BYTE = 0,   // 對應 funct3: 000 (LB/SB)
-        HALF = 1,   // 對應 funct3: 001 (LH/SH)
-        WORD = 2    // 對應 funct3: 010 (LW/SW)
+        BYTE = 0,               // Corresponding to funct3: 000 (LB/SB)
+        HALF = 1,               // Corresponding to funct3: 001 (LH/SH)
+        WORD = 2                // Corresponding to funct3: 010 (LW/SW)
     };
 
-    // ALU 操作類型 (解碼器給 ALU Control 的訊號)
+    // Types of ALU operation (the signal which decoder sending to ALU)
     enum class ALU_OP_TYPE : uint8_t {
-        MEMORY_REF = 0, // Load/Store (Bit: 000)
-        BRANCH     = 1, // Branch (Bit: 001)
-        R_TYPE     = 2, // R-Type (Bit: 010)
-        I_TYPE     = 3, // I-Type (Bit: 011)
-        LUI        = 4, // LUI (Bit: 100)
-        AUIPC      = 5  // AUIPC (Bit: 101) 
+        MEMORY_REF = 0,         // Load/Store (Bit: 000)
+        BRANCH     = 1,         // Branch     (Bit: 001)
+        R_TYPE     = 2,         // R-Type     (Bit: 010)
+        I_TYPE     = 3,         // I-Type     (Bit: 011)
+        LUI        = 4,         // LUI        (Bit: 100)
+        AUIPC      = 5          // AUIPC      (Bit: 101)
     };
 
     struct ExecuteSignal {
@@ -42,7 +42,6 @@ namespace RV32IM {
         bool LUI;
         ALU_OP_TYPE ALUOp;
     };
-
 
     struct MemorySignal {
         MEM_RW MemRW;
@@ -110,7 +109,7 @@ namespace RV32IM {
         std::optional<ID_EX_Data>  ID_data;
         std::optional<EX_MEM_Data> EX_data;
         std::optional<MEM_WB_Data> MEM_data;
-        std::optional<WB_Data> WB_data;
+        std::optional<WB_Data>     WB_data;
     };
 
 }

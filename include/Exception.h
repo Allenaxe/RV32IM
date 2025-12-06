@@ -1,9 +1,8 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-#include <stdexcept>
 #include <string>
-// #include <format>
+#include <format>
 
 namespace RV32IM {
 
@@ -33,6 +32,7 @@ namespace RV32IM {
             const std::string ExceptionName = "SegmentationError";
             SegmentationError (std::string _message);
     };
+
 }
 
 #endif

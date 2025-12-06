@@ -1,10 +1,13 @@
-#ifndef CPU_UTILITY
-#define CPU_UTILITY
+#ifndef PRINTER_H
+#define PRINTER_H
+
 #include <variant>
 #include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <vector>
+#include <iostream>
+
 #include "Structure.h"
 #include "Component.h"
 

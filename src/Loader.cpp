@@ -4,10 +4,11 @@
 #define BASE_ADDR 0x00000000
 
 namespace RV32IM {
+
     Loader::Loader() {};
 
     std::unique_ptr<Segmentation> Loader::Load (std::string p_filename, MainMemory &p_memory) {     // load from text file currently
-        startAddr = BASE_ADDR;              // starting addrees was fixed to 0x0
+        startAddr = BASE_ADDR;              // Starting addrees was fixed to 0x0
         std::fstream FileIn(p_filename, std::ios::in);
         std::string strLine;
 
@@ -36,10 +37,7 @@ namespace RV32IM {
             Offset += 4;        // sizeof(uint32_t) = 4
         }
 
-        // for(uint32_t idx = 0; idx < Offset; idx+=4){
-        //     std::cout << static_cast<std::bitset<32>>(p_memory.Read(mySegment.START_ADDR + idx)) << std::endl;
-        // }
-
         return std::make_unique<Segmentation>(mySeg);
     }
+
 }

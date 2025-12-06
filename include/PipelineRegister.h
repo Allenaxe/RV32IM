@@ -1,5 +1,5 @@
-#ifndef CPU_PIPELINE
-#define CPU_PIPELINE
+#ifndef PIPELINE_H
+#define PIPELINE_H
 
 namespace RV32IM {
 

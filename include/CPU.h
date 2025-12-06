@@ -1,5 +1,5 @@
-#ifndef CPU_PROCESSOR
-#define CPU_PROCESSOR
+#ifndef CPU_H
+#define CPU_H
 
 #include <iostream>
 #include <cstdint>
@@ -54,7 +54,7 @@ namespace RV32IM {
             Printer* Record;
 
         public:
-            CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput);
+            CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string p_Filename, bool p_ConsoleOutput);
             // ~CPU();
             // void Reset();
             void Run();
