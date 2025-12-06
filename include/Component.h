@@ -47,7 +47,7 @@ namespace RV32IM {
             uint32_t Register[NUMBER_REGISTER];
         public:
             RegisterFileRead Read(uint8_t rs1, uint8_t rs2);
-            void Write(uint8_t rd, uint32_t wd, bool we);
+            void Write(uint8_t rd, uint32_t p_WriteData, bool p_WriteEnable);
     };
 
     class ImmediateGenerator {

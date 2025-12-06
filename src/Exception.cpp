@@ -8,8 +8,7 @@ namespace RV32IM {
     }
 
     std::string BaseError::ShowMessage(){
-        // return std::format("{}: {}", ExceptionName, message);
-        return ExceptionName;
+        return std::format("{}: {}", ExceptionName, message);
     }
 
     // ValueError

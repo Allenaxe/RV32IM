@@ -1,4 +1,5 @@
 #include "Component.h"
+#include "Exception.h"
 
 namespace RV32IM {
 
@@ -6,9 +7,13 @@ namespace RV32IM {
         return RegisterFileRead {Register[rs1], Register[rs2]};
     }
 
-    void RegisterFile::Write (uint8_t rd, uint32_t wd, bool we) {
-        if (rd != 0 && we == 1)
-            Register[rd] = wd;
+    void RegisterFile::Write (uint8_t rd, uint32_t p_WriteData, bool p_WriteEnable) {
+        if (rd == 0) {
+            throw ValueError("RegisterFile: `rd` cannot be zero!");
+        }
+
+        if (p_WriteEnable == 1)
+            Register[rd] = p_WriteData;
     }
 
     ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3) {

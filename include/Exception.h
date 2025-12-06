@@ -1,9 +1,8 @@
 #ifndef EXCEPTION_H
 #define EXCEPTION_H
 
-#include <stdexcept>
 #include <string>
-// #include <format>
+#include <format>
 
 namespace RV32IM {
 
