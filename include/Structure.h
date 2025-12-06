@@ -19,19 +19,19 @@ namespace RV32IM {
     };
 
     enum class MEM_SIZE : uint8_t {
-        BYTE = 0,               // 對應 funct3: 000 (LB/SB)
-        HALF = 1,               // 對應 funct3: 001 (LH/SH)
-        WORD = 2                // 對應 funct3: 010 (LW/SW)
+        BYTE = 0,               // Corresponding to funct3: 000 (LB/SB)
+        HALF = 1,               // Corresponding to funct3: 001 (LH/SH)
+        WORD = 2                // Corresponding to funct3: 010 (LW/SW)
     };
 
     // Types of ALU operation (the signal which decoder sending to ALU)
     enum class ALU_OP_TYPE : uint8_t {
-        MEMORY_REF = 0, // Load/Store (Bit: 000)
-        BRANCH     = 1, // Branch (Bit: 001)
-        R_TYPE     = 2, // R-Type (Bit: 010)
-        I_TYPE     = 3, // I-Type (Bit: 011)
-        LUI        = 4, // LUI (Bit: 100)
-        AUIPC      = 5  // AUIPC (Bit: 101)
+        MEMORY_REF = 0,         // Load/Store (Bit: 000)
+        BRANCH     = 1,         // Branch     (Bit: 001)
+        R_TYPE     = 2,         // R-Type     (Bit: 010)
+        I_TYPE     = 3,         // I-Type     (Bit: 011)
+        LUI        = 4,         // LUI        (Bit: 100)
+        AUIPC      = 5          // AUIPC      (Bit: 101)
     };
 
     struct ExecuteSignal {
