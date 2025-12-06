@@ -26,18 +26,23 @@ namespace RV32IM {
 
     // ALU 操作類型 (解碼器給 ALU Control 的訊號)
     enum class ALU_OP_TYPE : uint8_t {
-        MEMORY_REF = 0, // Load/Store (Bit: 00)
-        BRANCH     = 1, // Branch (Bit: 01)
-        R_TYPE     = 2, // R-Type (Bit: 10)
-        I_TYPE     = 3  // I-Type (Bit: 11)
+        MEMORY_REF = 0, // Load/Store (Bit: 000)
+        BRANCH     = 1, // Branch (Bit: 001)
+        R_TYPE     = 2, // R-Type (Bit: 010)
+        I_TYPE     = 3, // I-Type (Bit: 011)
+        LUI        = 4, // LUI (Bit: 100)
+        AUIPC      = 5  // AUIPC (Bit: 101) 
     };
 
     struct ExecuteSignal {
         bool ALUSrc;
         bool Branch;
         bool Jump;
+        bool AUIPC;
+        bool LUI;
         ALU_OP_TYPE ALUOp;
     };
+
 
     struct MemorySignal {
         MEM_RW MemRW;
