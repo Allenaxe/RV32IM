@@ -24,7 +24,7 @@ namespace RV32IM {
     }
 
     // Determine calculate type
-    // @Return: funct3 (3 bit) + funct7 (1 bit)
+    // @Return: bitset<4> {funct3 (3 bit) + funct7 (1 bit)}
     std::bitset<4> ALU::AluControl (uint32_t p_funct3, uint32_t p_funct7) {
         std::bitset<4> type = p_funct3;
         type <<= 1;
@@ -42,16 +42,15 @@ namespace RV32IM {
         return p_Selector ? static_cast<int32_t>(imm) : static_cast<int32_t>(p_Src2);
     }
 
-    // int32_t ALU::Operate(DecodeOutput p_DecodeOutput)
-    int32_t ALU::Operate (std::bitset<4> p_aluOp,
-                          ALU_OP_TYPE p_ControlSignal,
+    int32_t ALU::Operate (std::bitset<4> p_ALUFunct,
+                          ALU_OP_TYPE p_ALUOp,
                           int32_t p_OpA,
                           int32_t p_OpB)
     {
         bool carryOut = false; // Carry Flag
         uint32_t complement;
 
-        switch (p_ControlSignal) {
+        switch (p_ALUOp) {
             // Load / Store
             case ALU_OP_TYPE::MEMORY_REF: {
                 return p_OpA + p_OpB;
@@ -69,58 +68,58 @@ namespace RV32IM {
             // Branch
             case ALU_OP_TYPE::BRANCH: {
                 // return PC + imm
-                switch ((p_aluOp >> 1).to_ulong()) {
+                switch ((p_ALUFunct >> 1).to_ulong()) {
 
                     // BEQ
                     case 000:
-                        if(p_OpA == p_OpB)          // return PC + imm
+                        if(p_OpA == p_OpB)          // Jump: return PC + imm
                             return p_OpA + p_OpB;
-                        else                        // return PC + 4
+                        else                        // Next instrution: return PC + 4
                             return p_OpA + 4;
 
                     // BNE
                     case 001:
-                        if(p_OpA != p_OpB)          // return PC + imm
+                        if(p_OpA != p_OpB)          // Jump: return PC + imm
                             return p_OpA + p_OpB;
-                        else                        // return PC + 4
+                        else                        // Next instrution: return PC + 4
                             return p_OpA + 4;
 
                     // BLT
                     case 100:
-                        if(static_cast<int32_t>(p_OpA) < static_cast<int32_t>(p_OpB)) // return PC + imm
+                        if (p_OpA < p_OpB)          // Jump: return PC + imm
                             return p_OpA + p_OpB;
-                        else                                                          // return PC + 4
+                        else                        // Next instrution: return PC + 4
                             return p_OpA + 4;
 
                     // BGE
                     case 101:
-                        if(static_cast<int32_t>(p_OpA) >= static_cast<int32_t>(p_OpB)) // return PC + imm
+                        if (p_OpA >= p_OpB)         // Jump: return PC + imm
                             return p_OpA + p_OpB;
-                        else                                                           // return PC + 4
+                        else                        // Next instrution: return PC + 4
                             return p_OpA + 4;
 
                     // BLTU
                     case 110:
-                        if(static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) // return PC + imm
+                        if (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) // Jump: return PC + imm
                             return p_OpA + p_OpB;
-                        else                                                            // return PC + 4
+                        else                                                             // Next instrution: return PC + 4
                             return p_OpA + 4;
 
                     // BGEU
                     case 111:
-                        if(static_cast<uint32_t>(p_OpA) >= static_cast<uint32_t>(p_OpB)) // return PC + imm
+                        if (static_cast<uint32_t>(p_OpA) >= static_cast<uint32_t>(p_OpB)) // Jump: return PC + imm
                             return p_OpA + p_OpB;
-                        else                                                             // return PC + 4
+                        else                                                              // Next instrution: return PC + 4
                             return p_OpA + 4;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
+                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
                         return 0;
                 }
             }
 
-            case ALU_OP_TYPE::R_TYPE: { // R-type
-                switch (p_aluOp.to_ulong()) {
+            case ALU_OP_TYPE::R_TYPE: {
+                switch (p_ALUFunct.to_ulong()) {
                     // ADD
                     case 0b0000:
                         return Adder(p_OpA, p_OpB, false, carryOut);
@@ -164,13 +163,13 @@ namespace RV32IM {
                         return p_OpA & p_OpB;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
+                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
                         return 0;
                 }
             }
 
-            case ALU_OP_TYPE::I_TYPE: {       // I-type
-                switch (p_aluOp.to_ulong()) {
+            case ALU_OP_TYPE::I_TYPE: {
+                switch (p_ALUFunct.to_ulong()) {
 
                     // ADDI
                     case 0b0000:
@@ -216,7 +215,7 @@ namespace RV32IM {
                         return p_OpA & p_OpB;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_aluOp >> 1) << " !" << std::endl;
+                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
                         return 0;
                 }
             }
