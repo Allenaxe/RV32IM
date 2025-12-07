@@ -96,7 +96,7 @@ namespace RV32IM {
         if(p_WriteBackInput.wb_ctrl.RegWrite)
             RF->Write(p_WriteBackInput.rd.to_ulong(), writeback_data, p_WriteBackInput.wb_ctrl.RegWrite);
 
-        return WB_Data { writeback_data, p_WriteBackInput.rd };
+        return WB_Data { writeback_data, p_WriteBackInput.rd, p_WriteBackInput.wb_ctrl.Halt };
     }
 
     void CPU::Run () {
@@ -106,9 +106,6 @@ namespace RV32IM {
 
         // Main loop for execution
         while (true) {
-
-            // Terminate Condition
-            if (cycle == 10) break;
 
             // Fetch (IF) Stage
             Fetch();
@@ -149,6 +146,8 @@ namespace RV32IM {
 
             Record->EndCycle(cycle);
             ++cycle;
+
+            if(writeback_output.Halt) break;
         }
 
         // After Loop
