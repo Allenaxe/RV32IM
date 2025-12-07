@@ -180,7 +180,7 @@ namespace RV32IM {
         os << "alu result                             : " << out.alu_result << '\n';
         os << "write data                             : " << out.write_data << '\n';
         os << "rd                                     : " << out.rd << '\n';
-        os << "{ MemRead, MemWrite, Signext, MemSize }: " << "{ " << out.mem_ctrl.MemRW << ", " << out.mem_ctrl.SignExt << ", " << out.mem_ctrl.MemSize << " }\n";
+        os << "{ MemRead, MemWrite, SignExt, MemSize }: " << "{ " << out.mem_ctrl.MemRW << ", " << out.mem_ctrl.SignExt << ", " << out.mem_ctrl.MemSize << " }\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -191,7 +191,7 @@ namespace RV32IM {
         os << "mem data                               : " << out.mem_data.value_or(0) << '\n';
         os << "alu result                             : " << out.alu_result << '\n';
         os << "rd                                     : " << out.rd << '\n';
-        os << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.MemToReg << ", " << out.wb_ctrl.RegWrite << " }\n";
+        os << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.RegWrite << ", " << out.wb_ctrl.MemToReg << " }\n";
         os << "-------------------------------------------------\n";
     }
 
@@ -278,7 +278,7 @@ namespace RV32IM {
                 oss << "alu result                             : " << out.alu_result << '\n';
                 oss << "write data                             : " << out.write_data << '\n';
                 oss << "rd                                     : " << out.rd << '\n';
-                oss << "{ MemRead, MemWrite, Signext, MemSize }: " << "{ " << out.mem_ctrl.MemRW << ", " << out.mem_ctrl.SignExt << ", " << out.mem_ctrl.MemSize << " }\n";
+                oss << "{ MemRead, MemWrite, SignExt, MemSize }: " << "{ " << out.mem_ctrl.MemRW << ", " << out.mem_ctrl.SignExt << ", " << out.mem_ctrl.MemSize << " }\n";
             }
             else {
                 oss << "[EX] Bubble\n";
@@ -292,7 +292,7 @@ namespace RV32IM {
                 oss << "mem data                               : " << out.mem_data.value_or(0) << '\n';
                 oss << "alu result                             : " << out.alu_result << '\n';
                 oss << "rd                                     : " << out.rd << '\n';
-                oss << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.MemToReg << ", " << out.wb_ctrl.RegWrite << " }\n";
+                oss << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.RegWrite << ", " << out.wb_ctrl.MemToReg << " }\n";
             }
             else {
                 oss << "[MEM] Bubble\n";
