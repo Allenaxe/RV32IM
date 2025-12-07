@@ -27,22 +27,24 @@ namespace RV32IM {
         std::bitset<7> opcode       { p_DecodeInput.inst & 0x0000'007F};           // IR[0:6]
         std::bitset<5> rd           {(p_DecodeInput.inst & 0x0000'0F80) >> 7};     // IR[7:11]
         std::bitset<3> funct3       {(p_DecodeInput.inst & 0x0000'7000) >> 12};    // IR[12:14]
-        uint8_t rs1 =               ( p_DecodeInput.inst & 0x000F'8000) >> 15;     // IR[15:19]
-        uint8_t rs2 =               ( p_DecodeInput.inst & 0x01F0'0000) >> 20;     // IR[20:24]
+        uint8_t rs1_id =            ( p_DecodeInput.inst & 0x000F'8000) >> 15;     // IR[15:19]
+        uint8_t rs2_id =            ( p_DecodeInput.inst & 0x01F0'0000) >> 20;     // IR[20:24]
         std::bitset<7> funct7       {(p_DecodeInput.inst & 0xFE00'0000) >> 25};    // IR[25:31]
 
         uint32_t imm = ImmediateGenerator::Generate(p_DecodeInput.inst);
         ControlSignal control_signal = ControlUnit::Generate(opcode, funct3);
 
-        RegisterFileRead RF_read = RF->Read(rs1, rs2);
+        RegisterFileRead RF_read = RF->Read(rs1_id, rs2_id);
+        uint32_t rs1_value = ForwardingUnit::ALUMux(rs1_id, RF_read.rs1, EX_MEM.Read(), MEM_WB.Read());
+        uint32_t rs2_value = ForwardingUnit::ALUMux(rs2_id, RF_read.rs2, EX_MEM.Read(), MEM_WB.Read());
 
         return ID_EX_Data {
-            RF_read.rs1,
-            RF_read.rs2,
+            rs1_value,
+            rs2_value,
             imm,
             rd,
-            rs1,
-            rs2,
+            rs1_id,
+            rs2_id,
             funct3,
             funct7,
             control_signal.ex_ctrl,

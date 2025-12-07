@@ -37,7 +37,7 @@ namespace RV32IM {
         bool Jump = isJType | isJALR;
         bool MemtoReg = isLOAD;
 
-        ALU_OP_TYPE ALUOp = static_cast<ALU_OP_TYPE>(((isRType | isIType) << 1) | (Branch | isIType) | (isLUI << 2) | ((isAUIPC << 2) + 1));
+        ALU_OP_TYPE ALUOp = static_cast<ALU_OP_TYPE>(((isRType | isIType) << 1) | (Branch | isIType) | (isLUI << 2) | ((isAUIPC << 2) | isAUIPC));
 
         MEM_SIZE MemSize = static_cast<MEM_SIZE>(p_funct3.to_ulong() & 0b11);
 
