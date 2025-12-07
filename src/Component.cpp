@@ -26,7 +26,7 @@ namespace RV32IM {
         bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJType;
         bool ALUSrc = isIType | isLOAD | isSType;
 
-        MEM_RW MemRW =  static_cast<MEM_RW>((isLOAD << 1) & isSType);
+        MEM_RW MemRW =  static_cast<MEM_RW>((isSType << 1) & isLOAD);
 
         bool Branch = isBType;
         bool Jump = isJType | isJALR;

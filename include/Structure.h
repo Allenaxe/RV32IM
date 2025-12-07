@@ -14,8 +14,8 @@ namespace RV32IM {
 
     enum class MEM_RW : uint8_t {
         NOP   = 0,              // Do nothing
-        READ  = 1,              // Able to read
-        WRITE = 2,              // Able to write
+        READ  = 1,              // Able to read (load)
+        WRITE = 2,              // Able to write (store)
     };
 
     enum class MEM_SIZE : uint8_t {
