@@ -32,10 +32,15 @@ namespace RV32IM {
         return os;
     }
 
-    Printer::Printer (const std::string& Filename, bool toConsole): ConsoleOutput(toConsole) {
+    Printer::Printer (const std::string& Filename, const std::string& TableFilename, bool toConsole): ConsoleOutput(toConsole) {
         LogFile.open(Filename);
         if(!LogFile.is_open()) {
             std::cerr << "[Printer Error] Cannot open log file: " << Filename << '\n';
+        }
+
+        TableLogFile.open(TableFilename);
+        if(!LogFile.is_open()) {
+            std::cerr << "[Printer Error] Cannot open log file: " << TableFilename << '\n';
         }
     }
 
@@ -207,6 +212,141 @@ namespace RV32IM {
         if (ConsoleOutput) {
             std::cout << message;
         }
+    }
+
+    void Printer::PrintTable () {
+        // Use tabulate datatypes here
+        using namespace tabulate;
+
+        Table table;
+
+        size_t numCycle = History.size();
+
+        // Add column headers
+        Table::Row_t header;
+        header.push_back("");
+        for (size_t i=0; i<numCycle; i++) {
+            header.push_back( std::format("Cycle {}", i+1) );
+        }
+        table.add_row(header);
+
+        // Add row headers
+        std::vector<std::string> StageName = {"IF", "ID", "EXE", "MEM", "WB"};
+        for (size_t i=0; i<StageName.size(); i++) {
+            table.add_row( {StageName[i]} );
+        }
+
+        // Fill snap into each cell
+        unsigned int ClockIdx = 0;
+        std::ostringstream oss;
+        for (const auto& snap : History) {
+            ClockIdx++;
+
+            // IF stage
+            oss.str("");
+            if (snap.IF_data.has_value()) {
+                auto out = snap.IF_data.value();
+                oss << "Program Counter                        : " << out.pc << '\n';
+                oss << "Instruction                            : " << std::bitset<32> {out.inst} << '\n';
+            }
+            else {
+                oss << "[IF] Bubble\n";
+            }
+            table.row(1)[ClockIdx].set_text(oss.str());
+
+            // ID stage
+            oss.str("");
+            if (snap.ID_data.has_value()) {
+                auto out = snap.ID_data.value();
+                oss << "rs1                                    : " << out.rs1 << '\n';
+                oss << "rs2                                    : " << out.rs2 << '\n';
+                oss << "rd                                     : " << out.rd << '\n';
+                oss << "funct3                                 : " << out.funct3 << '\n';
+                oss << "funct7                                 : " << out.funct7 << '\n';
+                oss << "imm                                    : " << std::bitset<32>(out.imm) << "\n";
+                oss << "{ ALUSrc, Branch, Jump, ALUOp }        : " << "{ " << out.ex_ctrl.ALUSrc << ", " << out.ex_ctrl.Branch << ", " << out.ex_ctrl.Jump << ", " << out.ex_ctrl.ALUOp << " }\n";
+            }
+            else {
+                oss << "[ID] Bubble\n";
+            }
+            table.row(2)[ClockIdx].set_text(oss.str());
+
+            // EXE stage
+            oss.str("");
+            if (snap.EX_data.has_value()) {
+                auto out = snap.EX_data.value();
+                oss << "alu result                             : " << out.alu_result << '\n';
+                oss << "write data                             : " << out.write_data << '\n';
+                oss << "rd                                     : " << out.rd << '\n';
+                oss << "{ MemRead, MemWrite, Signext, MemSize }: " << "{ " << out.mem_ctrl.MemRW << ", " << out.mem_ctrl.SignExt << ", " << out.mem_ctrl.MemSize << " }\n";
+            }
+            else {
+                oss << "[EX] Bubble\n";
+            }
+            table.row(3)[ClockIdx].set_text(oss.str());
+
+            // MEM stage
+            oss.str("");
+            if (snap.MEM_data.has_value()) {
+                auto out = snap.MEM_data.value();
+                oss << "mem data                               : " << out.mem_data.value_or(0) << '\n';
+                oss << "alu result                             : " << out.alu_result << '\n';
+                oss << "rd                                     : " << out.rd << '\n';
+                oss << "{ RegWrite, MemtoReg }                 : " << "{ " << out.wb_ctrl.MemToReg << ", " << out.wb_ctrl.RegWrite << " }\n";
+            }
+            else {
+                oss << "[MEM] Bubble\n";
+            }
+            table.row(4)[ClockIdx].set_text(oss.str());
+
+            // WB stage
+            oss.str("");
+            if (snap.WB_data.has_value()) {
+                auto out = snap.WB_data.value();
+                oss << "writeback data                         : " << out.writeback_data << '\n';
+                oss << "rd                                     : " << out.rd << '\n';
+            }
+            else {
+                oss << "[WB] Bubble\n";
+            }
+            table.row(5)[ClockIdx].set_text(oss.str());
+        }
+
+        table.format()
+             .font_style({FontStyle::bold})
+             .border_top("-")
+             .border_bottom("-")
+             .border_left("|")
+             .border_right("|")
+             .corner("+");
+
+        table.row(0).format()
+                    .font_align(FontAlign::center);
+
+        // Make row header aligns vertically center
+        for (int rowIdx = 1; rowIdx<table.size(); rowIdx++){
+
+            // Determine the max height of each row
+            auto& row = table.row(rowIdx);
+            size_t row_height = 0;
+            for (size_t i=0; i<row.size(); i++){
+                const std::string& ops_text = row[i].get_text();
+                const size_t cell_height = std::count(ops_text.begin(), ops_text.end(), '\n');
+                row_height = std::max(row_height, cell_height);
+            }
+
+            // If row height is even, add a line of bottom padding to that row
+            if (row_height % 2 == 0) {
+                row.format().padding_bottom(1);
+            }
+
+            // Align row header to vertically center
+            row[0].set_text(std::string(row_height / 2, '\n') + row[0].get_text());
+        }
+
+
+        TableLogFile << table;
+        TableLogFile.flush();
     }
 
 }
