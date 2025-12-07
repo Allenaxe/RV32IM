@@ -145,6 +145,8 @@ namespace RV32IM {
             WB_Data writeback_output = WriteBack(writeback_input);
             Record->RecordState(writeback_output);
 
+            Record->RecordState(RF);
+
             IF_ID.Update();
             ID_EX.Update();
             EX_MEM.Update();

@@ -42,6 +42,7 @@ namespace RV32IM {
             void RecordState(const EX_MEM_Data& p_Data);
             void RecordState(const MEM_WB_Data& p_Ddata);
             void RecordState(const WB_Data& p_Ddata);
+            void RecordState (RegisterFile* RF);
             void EndCycle(int cycle_num);
             void PrintTrace();
             void PrintTable ();

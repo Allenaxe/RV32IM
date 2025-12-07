@@ -70,6 +70,14 @@ namespace RV32IM {
         CurrentCycleSnapshot.WB_data = p_Data;
     }
 
+    void Printer::RecordState (RegisterFile* RF) {
+        for (size_t i=0; i<32; i+=2) {
+            RegisterFileRead RF_read = RF->Read(i, i+1);
+            CurrentCycleSnapshot.register_data.push_back(RF_read.rs1);
+            CurrentCycleSnapshot.register_data.push_back(RF_read.rs2);
+        }
+    }
+
     void Printer::EndCycle (int cycle_num) {
         CurrentCycleSnapshot.cycle_number = cycle_num;
         History.push_back(CurrentCycleSnapshot);
@@ -80,10 +88,12 @@ namespace RV32IM {
     void Printer::PrintRegisters (RegisterFile* RF) {
         std::ostringstream oss;
         const std::string regNames[32] = {
-            "x0/zero", "x1/ra", "x2/sp", "x3/gp", "x4/tp", "x5/t0", "x6/t1", "x7/t2",
-            "x8/s0", "x9/s1", "x10/a0", "x11/a1", "x12/a2", "x13/a3", "x14/a4", "x15/a5",
-            "x16/a6", "x17/a7", "x18/s2", "x19/s3", "x20/s4", "x21/s5", "x22/s6", "x23/s7",
-            "x24/s8", "x25/s9", "x26/s10", "x27/s11", "x28/t3", "x29/t4", "x30/t5", "x31/t6"
+            "x0/zero",  "x1/ra",    "x2/sp",    "x3/gp",    "x4/tp",    "x5/t0",
+            "x6/t1",    "x7/t2",    "x8/s0",    "x9/s1",    "x10/a0",   "x11/a1",
+            "x12/a2",   "x13/a3",   "x14/a4",   "x15/a5",   "x16/a6",   "x17/a7",
+            "x18/s2",   "x19/s3",   "x20/s4",   "x21/s5",   "x22/s6",   "x23/s7",
+            "x24/s8",   "x25/s9",   "x26/s10",  "x27/s11",  "x28/t3",   "x29/t4",
+            "x30/t5",   "x31/t6"
         };
 
         oss << "--------------------------------------------\n";
@@ -218,9 +228,11 @@ namespace RV32IM {
         // Use tabulate datatypes here
         using namespace tabulate;
 
-        Table table;
-
         size_t numCycle = History.size();
+
+        Table table;
+        Table::Row_t registerRow;
+        registerRow.push_back("Registers");
 
         // Add column headers
         Table::Row_t header;
@@ -310,7 +322,61 @@ namespace RV32IM {
                 oss << "[WB] Bubble\n";
             }
             table.row(5)[ClockIdx].set_text(oss.str());
+
+            Table registerTable;
+            registerTable.add_row({"Register", "ABI Name", "Hex Value", "Decimal Value"});
+
+            const std::string regNames[32] = {
+                "x0",  "x1",  "x2",  "x3",  "x4",  "x5",
+                "x6",  "x7",  "x8",  "x9",  "x10", "x11",
+                "x12", "x13", "x14", "x15", "x16", "x17",
+                "x18", "x19", "x20", "x21", "x22", "x23",
+                "x24", "x25", "x26", "x27", "x28", "x29",
+                "x30", "x31"
+            };
+
+            const std::string regName_ABI[32] = {
+                "zero", "ra", "sp",  "gp",  "tp", "t0",
+                "t1",   "t2", "s0",  "s1",  "a0", "a1",
+                "a2",   "a3", "a4",  "a5",  "a6", "a7",
+                "s2",   "s3", "s4",  "s5",  "s6", "s7",
+                "s8",   "s9", "s10", "s11", "t3", "t4",
+                "t5",   "t6"
+            };
+
+            // Add register data into internal table
+            for (size_t i=0; i<snap.register_data.size(); i++) {
+                registerTable.add_row( {regNames[i],
+                                        regName_ABI[i],
+                                        std::format("0x{:X}", snap.register_data[i]),
+                                        std::format("{:d}", snap.register_data[i])}
+                );
+            }
+
+            registerTable.format()
+                         .font_style({FontStyle::bold})
+                         .border_top("-")
+                         .border_bottom("-")
+                         .border_left("|")
+                         .border_right("|")
+                         .corner("+");
+
+            registerTable.column(0).format()
+                         .font_align(FontAlign::center);
+            registerTable.column(1).format()
+                         .font_align(FontAlign::center);
+            registerTable.column(2).format()
+                         .width(15)
+                         .font_align(FontAlign::right);
+            registerTable.column(3).format()
+                         .width(20)
+                         .font_align(FontAlign::right);
+
+            // Add internal table to row
+            registerRow.push_back(registerTable);
         }
+
+        table.add_row(registerRow);
 
         table.format()
              .font_style({FontStyle::bold})
@@ -323,8 +389,14 @@ namespace RV32IM {
         table.row(0).format()
                     .font_align(FontAlign::center);
 
+        table.column(0).format()
+                    .font_align(FontAlign::center);
+
+        table.row(6).format()
+                    .font_align(FontAlign::center);
+
         // Make row header aligns vertically center
-        for (int rowIdx = 1; rowIdx<table.size(); rowIdx++){
+        for (size_t rowIdx = 1; rowIdx<table.size(); rowIdx++){
 
             // Determine the max height of each row
             auto& row = table.row(rowIdx);
@@ -343,7 +415,6 @@ namespace RV32IM {
             // Align row header to vertically center
             row[0].set_text(std::string(row_height / 2, '\n') + row[0].get_text());
         }
-
 
         TableLogFile << table;
         TableLogFile.flush();
