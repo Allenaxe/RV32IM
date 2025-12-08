@@ -76,7 +76,6 @@ namespace RV32IM {
         MEM_RW MemRW = p_MemoryInput.mem_ctrl.MemRW;
         bool SignExt = p_MemoryInput.mem_ctrl.SignExt;
         MEM_SIZE MemSize = p_MemoryInput.mem_ctrl.MemSize;
-        // uint32_t Imm = p_MemoryInput.rd;
 
         std::tuple<uint32_t, std::bitset<4>> AddrPack = LoadStoreUnit::DecodeAddr(p_MemoryInput.alu_result, MemSize);
 
@@ -110,18 +109,10 @@ namespace RV32IM {
         // Main loop for execution
         while (true) {
 
-            // Fetch (IF) Stage
-            Fetch();
-            IF_ID_Data fetch_output {PC, IR};
-            Record->RecordState(fetch_output);
-            IF_ID.Write(fetch_output);
-
-            // Decode (ID) Stage
-            IF_ID_Data decode_input = IF_ID.Read();
-            ID_EX_Data decode_output = Decode(decode_input);
-            Record->RecordState(decode_output);
-            ID_EX.Write(decode_output);
-
+            // Write-Back (WB) Stage
+            MEM_WB_Data writeback_input = MEM_WB.Read();
+            WB_Data writeback_output = WriteBack(writeback_input);
+            Record->RecordState(writeback_output);
 
             // Execute (EX) Stage
             ID_EX_Data execute_input = ID_EX.Read();
@@ -129,18 +120,23 @@ namespace RV32IM {
             Record->RecordState(execute_output);
             EX_MEM.Write(execute_output);
 
-
             // Memory (MEM) Stage
             EX_MEM_Data memory_input = EX_MEM.Read();
             MEM_WB_Data memory_output = Memory(memory_input);
             Record->RecordState(memory_output);
             MEM_WB.Write(memory_output);
 
+            // Decode (ID) Stage
+            IF_ID_Data decode_input = IF_ID.Read();
+            ID_EX_Data decode_output = Decode(decode_input);
+            Record->RecordState(decode_output);
+            ID_EX.Write(decode_output);
 
-            // Write-Back (WB) Stage
-            MEM_WB_Data writeback_input = MEM_WB.Read();
-            WB_Data writeback_output = WriteBack(writeback_input);
-            Record->RecordState(writeback_output);
+            // Fetch (IF) Stage
+            Fetch();
+            IF_ID_Data fetch_output {PC, IR};
+            Record->RecordState(fetch_output);
+            IF_ID.Write(fetch_output);
 
             Record->RecordState(RF);
 
