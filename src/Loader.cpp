@@ -16,6 +16,11 @@ namespace RV32IM {
         std::vector<uint32_t> InstrBuffer;
         size_t numInstr = 0;
         while(getline(FileIn, strLine)){
+
+            const char* typeOfWhitespaces = " \t\n\r\f\v";
+            strLine.erase(0, strLine.find_first_not_of(typeOfWhitespaces));
+            strLine.erase(strLine.find_last_not_of(typeOfWhitespaces) + 1);
+
             if (strLine.empty()) continue;
 
             std::bitset<32> bitLine(strLine);
