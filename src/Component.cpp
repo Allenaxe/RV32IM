@@ -27,6 +27,7 @@ namespace RV32IM {
         bool isJALR = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];            // if p_Opcode == 0b1100111
         bool isLUI = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];             // if p_Opcode == 0b0110111
         bool isAUIPC = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];        // if p_Opcode == 0b0010111
+        bool isECALL = p_Opcode[6] & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];           // if p_Opcode == 0b1110011
 
         bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJType;
         bool ALUSrc = isIType | isLOAD | isSType | isLUI | isAUIPC;
@@ -36,6 +37,7 @@ namespace RV32IM {
         bool Branch = isBType;
         bool Jump = isJType | isJALR;
         bool MemtoReg = isLOAD;
+        bool Halt = isECALL;
 
         ALU_OP_TYPE ALUOp = static_cast<ALU_OP_TYPE>(((isRType | isIType) << 1) | (Branch | isIType) | (isLUI << 2) | ((isAUIPC << 2) + 1));
 
@@ -46,7 +48,7 @@ namespace RV32IM {
         return ControlSignal {
             ExecuteSignal { ALUSrc, Branch, Jump, isAUIPC, isLUI, ALUOp },
             MemorySignal { MemRW, SignExt, MemSize },
-            WriteBackSignal { RegWrite, MemtoReg }
+            WriteBackSignal { RegWrite, MemtoReg, Halt }
         };
     }
 

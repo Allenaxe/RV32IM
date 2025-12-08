@@ -52,6 +52,7 @@ namespace RV32IM {
     struct WriteBackSignal {
         bool RegWrite;
         bool MemToReg;
+        bool Halt;
     };
 
     struct ControlSignal {
@@ -101,6 +102,7 @@ namespace RV32IM {
      struct WB_Data {
         uint32_t writeback_data;
         std::bitset<5> rd;
+        bool Halt;              // Indicate whether to halt the CPU
     };
 
     struct CycleSnapshot {
