@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <bitset>
+#include <vector>
 #include <optional>
 
 namespace RV32IM {
@@ -112,6 +113,7 @@ namespace RV32IM {
         std::optional<EX_MEM_Data> EX_data;
         std::optional<MEM_WB_Data> MEM_data;
         std::optional<WB_Data>     WB_data;
+        std::vector<uint32_t>      register_data;
     };
 
 }

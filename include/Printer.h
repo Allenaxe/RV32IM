@@ -7,6 +7,12 @@
 #include <iomanip>
 #include <vector>
 #include <iostream>
+#include <string>
+#include <format>
+#include <algorithm>
+#include <ranges>
+
+#include <tabulate/table.hpp>
 
 #include "Structure.h"
 #include "Component.h"
@@ -22,10 +28,13 @@ namespace RV32IM {
             std::vector<CycleSnapshot> History;
             CycleSnapshot CurrentCycleSnapshot;
             std::ofstream LogFile;
+            std::ofstream TableLogFile;
             bool ConsoleOutput;
 
         public:
-            Printer(const std::string& Filename, bool toConsole);
+            Printer(const std::string& Filename,
+                    const std::string& TableFilename,
+                    bool toConsole);
             ~Printer();
 
             void RecordState(const IF_ID_Data& p_Data);
@@ -33,8 +42,10 @@ namespace RV32IM {
             void RecordState(const EX_MEM_Data& p_Data);
             void RecordState(const MEM_WB_Data& p_Ddata);
             void RecordState(const WB_Data& p_Ddata);
+            void RecordState (RegisterFile* RF);
             void EndCycle(int cycle_num);
             void PrintTrace();
+            void PrintTable ();
 
             void PrintState(std::ostream& os, const IF_ID_Data& data);
             void PrintState(std::ostream& os, const ID_EX_Data& data);

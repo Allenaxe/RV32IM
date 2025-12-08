@@ -54,7 +54,10 @@ namespace RV32IM {
             Printer* Record;
 
         public:
-            CPU(std::unique_ptr<Segmentation>& p_ProgSeg, std::string p_Filename, bool p_ConsoleOutput);
+            CPU(std::unique_ptr<Segmentation>& p_ProgSeg,
+                std::string p_Filename,
+                std::string p_TableFilename,
+                bool p_ConsoleOutput);
             // ~CPU();
             // void Reset();
             void Run();

@@ -4,10 +4,13 @@
 
 namespace RV32IM {
 
-    CPU::CPU (std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput)
-                : RF(new RegisterFile()),
-                  DM(new DataMemory(p_ProgSeg)),
-                  Record(new Printer(Filename, ConsoleOutput))
+    CPU::CPU (std::unique_ptr<Segmentation>& p_ProgSeg,
+              std::string Filename,
+              std::string TableFilename,
+              bool ConsoleOutput)
+        : RF(new RegisterFile()),
+          DM(new DataMemory(p_ProgSeg)),
+          Record(new Printer(Filename, TableFilename, ConsoleOutput))
     {
         PC = DM->seg->START_ADDR;
         IF_ID = {};
@@ -139,6 +142,8 @@ namespace RV32IM {
             WB_Data writeback_output = WriteBack(writeback_input);
             Record->RecordState(writeback_output);
 
+            Record->RecordState(RF);
+
             IF_ID.Update();
             ID_EX.Update();
             EX_MEM.Update();
@@ -153,5 +158,6 @@ namespace RV32IM {
         // After Loop
         Record->PrintTrace();
         Record->PrintRegisters(RF);
+        Record->PrintTable();
     }
 }
