@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <bitset>
+#include <vector>
 #include <optional>
 
 namespace RV32IM {
@@ -14,8 +15,8 @@ namespace RV32IM {
 
     enum class MEM_RW : uint8_t {
         NOP   = 0,              // Do nothing
-        READ  = 1,              // Able to read
-        WRITE = 2,              // Able to write
+        READ  = 1,              // Able to read (load)
+        WRITE = 2,              // Able to write (store)
     };
 
     enum class MEM_SIZE : uint8_t {
@@ -52,6 +53,7 @@ namespace RV32IM {
     struct WriteBackSignal {
         bool RegWrite;
         bool MemToReg;
+        bool Halt;
     };
 
     struct ControlSignal {
@@ -101,6 +103,7 @@ namespace RV32IM {
      struct WB_Data {
         uint32_t writeback_data;
         std::bitset<5> rd;
+        bool Halt;              // Indicate whether to halt the CPU
     };
 
     struct CycleSnapshot {
@@ -110,6 +113,7 @@ namespace RV32IM {
         std::optional<EX_MEM_Data> EX_data;
         std::optional<MEM_WB_Data> MEM_data;
         std::optional<WB_Data>     WB_data;
+        std::vector<uint32_t>      register_data;
     };
 
 }

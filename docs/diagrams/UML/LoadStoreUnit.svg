@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" contentScriptType="application/ecmascript" contentStyleType="text/css" height="268px" preserveAspectRatio="none" style="width:724px;height:268px;" version="1.1" viewBox="0 0 724 268" width="724px" zoomAndPan="magnify"><defs><filter height="300%" id="fk7equxxv6mhc" width="300%" x="-1" y="-1"><feGaussianBlur result="blurOut" stdDeviation="2.0"/><feColorMatrix in="blurOut" result="blurOut2" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .4 0"/><feOffset dx="4.0" dy="4.0" in="blurOut2" result="blurOut3"/><feBlend in="SourceGraphic" in2="blurOut3" mode="normal"/></filter></defs><g><!--MD5=[ef6e8d1df51384373a2ca04c8758f091]
+class C_0004683653610657880423--><rect fill="#FEFECE" filter="url(#fk7equxxv6mhc)" height="86.4141" id="C_0004683653610657880423" style="stroke: #A80036; stroke-width: 1.5;" width="94" x="217" y="171"/><ellipse cx="232" cy="187" fill="#EB937F" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M236.1094,193 L228.3906,193 L228.3906,180.6094 L236.1094,180.6094 L236.1094,182.7656 L230.8438,182.7656 L230.8438,185.4375 L235.6094,185.4375 L235.6094,187.5938 L230.8438,187.5938 L230.8438,190.8438 L236.1094,190.8438 L236.1094,193 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="62" x="246" y="191.1543">MEM_SIZE</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="218" x2="310" y1="203" y2="203"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="29" x="223" y="217.2104">BYTE</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="27" x="223" y="230.0151">HALF</text><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="33" x="223" y="242.8198">WORD</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="218" x2="310" y1="249.4141" y2="249.4141"/><!--MD5=[0d001d254163a07b2dd6ba0bfab79d41]
+class C_0018167716232135348682--><rect fill="#FEFECE" filter="url(#fk7equxxv6mhc)" height="86.4141" id="C_0018167716232135348682" style="stroke: #A80036; stroke-width: 1.5;" width="146" x="6" y="8"/><ellipse cx="33.6" cy="24" fill="#ADD1B2" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M36.5688,29.6406 Q35.9906,29.9375 35.35,30.0781 Q34.7094,30.2344 34.0063,30.2344 Q31.5063,30.2344 30.1781,28.5938 Q28.8656,26.9375 28.8656,23.8125 Q28.8656,20.6875 30.1781,19.0313 Q31.5063,17.375 34.0063,17.375 Q34.7094,17.375 35.35,17.5313 Q36.0063,17.6875 36.5688,17.9844 L36.5688,20.7031 Q35.9438,20.125 35.35,19.8594 Q34.7563,19.5781 34.1313,19.5781 Q32.7875,19.5781 32.1,20.6563 Q31.4125,21.7188 31.4125,23.8125 Q31.4125,25.9063 32.1,26.9844 Q32.7875,28.0469 34.1313,28.0469 Q34.7563,28.0469 35.35,27.7813 Q35.9438,27.5 36.5688,26.9219 L36.5688,29.6406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="86" x="50.4" y="28.1543">MemorySignal</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="151" y1="40" y2="40"/><line style="stroke: #A80036; stroke-width: 1.5;" x1="7" x2="151" y1="48" y2="48"/><ellipse cx="17" cy="59" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="102" x="26" y="62.2104">MemRW : MEM_RW</text><ellipse cx="17" cy="71.8047" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="120" x="26" y="75.0151">MemSize : MEM_SIZE</text><ellipse cx="17" cy="84.6094" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" textLength="78" x="26" y="87.8198">SignExt : bool</text><!--MD5=[939c654799f60440beae6ca73522e4e9]
+class C_0002158977228876040337--><rect fill="#FEFECE" filter="url(#fk7equxxv6mhc)" height="60.8047" id="C_0002158977228876040337" style="stroke: #A80036; stroke-width: 1.5;" width="526" x="187" y="20.5"/><ellipse cx="401.25" cy="36.5" fill="#ADD1B2" rx="11" ry="11" style="stroke: #A80036; stroke-width: 1.0;"/><path d="M404.2188,42.1406 Q403.6406,42.4375 403,42.5781 Q402.3594,42.7344 401.6563,42.7344 Q399.1563,42.7344 397.8281,41.0938 Q396.5156,39.4375 396.5156,36.3125 Q396.5156,33.1875 397.8281,31.5313 Q399.1563,29.875 401.6563,29.875 Q402.3594,29.875 403,30.0313 Q403.6563,30.1875 404.2188,30.4844 L404.2188,33.2031 Q403.5938,32.625 403,32.3594 Q402.4063,32.0781 401.7813,32.0781 Q400.4375,32.0781 399.75,33.1563 Q399.0625,34.2188 399.0625,36.3125 Q399.0625,38.4063 399.75,39.4844 Q400.4375,40.5469 401.7813,40.5469 Q402.4063,40.5469 403,40.2813 Q403.5938,40 404.2188,39.4219 L404.2188,42.1406 Z "/><text fill="#000000" font-family="sans-serif" font-size="12" lengthAdjust="spacingAndGlyphs" textLength="89" x="421.75" y="40.6543">LoadStoreUnit</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="188" x2="712" y1="52.5" y2="52.5"/><ellipse cx="198" cy="63.5" fill="#84BE84" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="11" lengthAdjust="spacingAndGlyphs" text-decoration="underline" textLength="500" x="207" y="66.7104">DecodeAddr(uint32_t p_Addr, MEM_SIZE MemSize) : std::tuple&lt;uint32_t,std::bitset&lt;4&gt;&gt;</text><line style="stroke: #A80036; stroke-width: 1.5;" x1="188" x2="712" y1="73.3047" y2="73.3047"/><!--MD5=[38afd7ade0852b703731b932ef12a4b4]
+reverse link C_0018167716232135348682 to C_0004683653610657880423--><path d="M137.57,102.98 C163.2,125.27 192.85,151.08 217,172.09 " fill="none" id="C_0018167716232135348682&lt;-C_0004683653610657880423" style="stroke: #A80036; stroke-width: 1.0;"/><polygon fill="#FFFFFF" points="127.61,94.3,129.5152,101.2549,136.6678,102.1712,134.7626,95.2163,127.61,94.3" style="stroke: #A80036; stroke-width: 1.0;"/><ellipse cx="184" cy="133.0664" fill="none" rx="3" ry="3" style="stroke: #038048; stroke-width: 1.0;"/><text fill="#000000" font-family="sans-serif" font-size="13" lengthAdjust="spacingAndGlyphs" textLength="59" x="191" y="137.0669">MemSize</text><!--MD5=[949c395d865263482436fe447901df56]
+link C_0002158977228876040337 to C_0004683653610657880423--><path d="M415.88,81.53 C387.67,105.96 347.16,141.02 315.08,168.79 " fill="none" id="C_0002158977228876040337-&gt;C_0004683653610657880423" style="stroke: #A80036; stroke-width: 1.0; stroke-dasharray: 7.0,7.0;"/><polygon fill="#A80036" points="311.21,172.14,320.635,169.2819,314.9932,168.8708,315.4043,163.2289,311.21,172.14" style="stroke: #A80036; stroke-width: 1.0;"/><!--MD5=[3c42dc968a684795ca1e2d899943aede]
+@startuml
+enum "MEM_SIZE" as C_0004683653610657880423
+enum C_0004683653610657880423 {
+BYTE
+HALF
+WORD
+}
+class "MemorySignal" as C_0018167716232135348682
+class C_0018167716232135348682 {
+__
++MemRW : MEM_RW
++MemSize : MEM_SIZE
++SignExt : bool
+}
+class "LoadStoreUnit" as C_0002158977228876040337
+class C_0002158977228876040337 {
+{static} +DecodeAddr(uint32_t p_Addr, MEM_SIZE MemSize) : std::tuple<uint32_t,std::bitset<4>>
+__
+}
+C_0018167716232135348682 o- - C_0004683653610657880423 : +MemSize
+C_0002158977228876040337 ..> C_0004683653610657880423
+
+@enduml
+
+PlantUML version 1.2020.02(Sun Mar 01 18:22:07 CST 2020)
+(GPL source distribution)
+Java Runtime: OpenJDK Runtime Environment
+JVM: OpenJDK 64-Bit Server VM
+Java Version: 21.0.9+10-Ubuntu-124.04
+Operating System: Linux
+Default Encoding: UTF-8
+Language: en
+Country: null
+--></g></svg>

@@ -8,6 +8,7 @@ int main(int argc, char* argv[]) {
 
     std::string machineCodeFile = "machine_codes.txt";
     std::string logFile         = "Log.txt";
+    std::string table_filename  = "Log_table.txt";
     bool consoleOutput          = true;
 
     // Argument parser
@@ -35,7 +36,7 @@ int main(int argc, char* argv[]) {
     std::cout << mySeg -> START_ADDR << " " << mySeg -> DATA_ADDR << " " << mySeg -> BSS_ADDR << " "
               << mySeg -> HEAP_ADDR << " " << mySeg -> END_ADDR << std::endl;
 
-    RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, logFile, consoleOutput);
+    RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, logFile, table_filename, consoleOutput);
     cpu->Run();
 
 }

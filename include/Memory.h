@@ -6,6 +6,7 @@
 #include <vector>
 #include <memory>
 #include <bitset>
+#include <string>
 // #include <format>
 
 namespace RV32IM {

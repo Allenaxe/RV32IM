@@ -3,6 +3,7 @@ test/
 .vscode/
 cpu_simulator
 Log.txt
+Log_table.txt
 
 # Prerequisites
 *.d

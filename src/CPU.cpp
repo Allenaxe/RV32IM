@@ -4,10 +4,13 @@
 
 namespace RV32IM {
 
-    CPU::CPU (std::unique_ptr<Segmentation>& p_ProgSeg, std::string Filename, bool ConsoleOutput)
-                : RF(new RegisterFile()),
-                  DM(new DataMemory(p_ProgSeg)),
-                  Record(new Printer(Filename, ConsoleOutput))
+    CPU::CPU (std::unique_ptr<Segmentation>& p_ProgSeg,
+              std::string Filename,
+              std::string TableFilename,
+              bool ConsoleOutput)
+        : RF(new RegisterFile()),
+          DM(new DataMemory(p_ProgSeg)),
+          Record(new Printer(Filename, TableFilename, ConsoleOutput))
     {
         PC = DM->seg->START_ADDR;
         IF_ID = {};
@@ -98,7 +101,7 @@ namespace RV32IM {
         if(p_WriteBackInput.wb_ctrl.RegWrite)
             RF->Write(p_WriteBackInput.rd.to_ulong(), writeback_data, p_WriteBackInput.wb_ctrl.RegWrite);
 
-        return WB_Data { writeback_data, p_WriteBackInput.rd };
+        return WB_Data { writeback_data, p_WriteBackInput.rd, p_WriteBackInput.wb_ctrl.Halt };
     }
 
     void CPU::Run () {
@@ -108,9 +111,6 @@ namespace RV32IM {
 
         // Main loop for execution
         while (true) {
-
-            // Terminate Condition
-            if (cycle == 10) break;
 
             // Fetch (IF) Stage
             Fetch();
@@ -144,6 +144,8 @@ namespace RV32IM {
             WB_Data writeback_output = WriteBack(writeback_input);
             Record->RecordState(writeback_output);
 
+            Record->RecordState(RF);
+
             IF_ID.Update();
             ID_EX.Update();
             EX_MEM.Update();
@@ -151,10 +153,13 @@ namespace RV32IM {
 
             Record->EndCycle(cycle);
             ++cycle;
+
+            if(writeback_output.Halt) break;
         }
 
         // After Loop
         Record->PrintTrace();
         Record->PrintRegisters(RF);
+        Record->PrintTable();
     }
 }

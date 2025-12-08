@@ -23,9 +23,9 @@ namespace RV32IM {
           END_ADDR(p_endAddr) {}
 
     // Helper function: translate address format to array offset
-    // uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
-    //     return (p_Address - START_ADDR) / sizeof(uint8_t);
-    // }
+    uint32_t Segmentation::AddrTranslate (uint32_t p_Address) {
+        return (p_Address - START_ADDR) / sizeof(uint8_t);
+    }
 
     uint32_t Segmentation::Read (uint32_t p_Address) {
 
@@ -36,9 +36,8 @@ namespace RV32IM {
             throw SegmentationError(message);
         }
 
-        // uint32_t ArrayOffset = AddrTranslate(p_Address);
-
-        const uint8_t* mem = &Storage[p_Address];
+        uint32_t ArrayOffset = AddrTranslate(p_Address);
+        const uint8_t* mem = &Storage[ArrayOffset];
 
         return (static_cast<uint32_t>(mem[0]) << 0)  |
                (static_cast<uint32_t>(mem[1]) << 8)  |
@@ -47,8 +46,8 @@ namespace RV32IM {
     }
 
     void Segmentation::Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask) {
-        // uint32_t addr = AddrTranslate(p_Address);
-        uint8_t* mem = &Storage[p_Address];
+        uint32_t ArrayOffset = AddrTranslate(p_Address);
+        uint8_t* mem = &Storage[ArrayOffset];
 
         if(p_ByteMask[0]) mem[0] = (p_Value >> 0)  & 0xFF;
         if(p_ByteMask[1]) mem[1] = (p_Value >> 8)  & 0xFF;
