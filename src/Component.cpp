@@ -39,7 +39,13 @@ namespace RV32IM {
         bool MemtoReg = isLOAD;
         bool Halt = isECALL;
 
-        ALU_OP_TYPE ALUOp = static_cast<ALU_OP_TYPE>(((isRType | isIType) << 1) | (Branch | isIType) | (isLUI << 2) | ((isAUIPC << 2) + 1));
+        ALU_OP_TYPE ALUOp =
+            isRType ? ALU_OP_TYPE::R_TYPE :
+            isIType ? ALU_OP_TYPE::I_TYPE :
+            Branch  ? ALU_OP_TYPE::BRANCH :
+            isLUI   ? ALU_OP_TYPE::LUI :
+            isAUIPC ? ALU_OP_TYPE::AUIPC :
+                      ALU_OP_TYPE::MEMORY_REF;
 
         MEM_SIZE MemSize = static_cast<MEM_SIZE>(p_funct3.to_ulong() & 0b11);
 
