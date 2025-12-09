@@ -21,9 +21,8 @@ namespace RV32IM {
 
         private:
             static int32_t Adder (uint32_t p_Src1, uint32_t p_Src2, bool cin, bool &carry);
-            // static int32_t Multiplier (uint32_t p_Src1, uint32_t p_Src2);
-            // static int32_t Divider (uint32_t p_Src1, uint32_t p_Src2);
 
+            // Multiplier
             static uint32_t MUL (uint32_t a, uint32_t b);
             static uint32_t MULH(int32_t a, int32_t b);
             static uint32_t MULHSU(int32_t a, uint32_t b);
@@ -44,8 +43,13 @@ namespace RV32IM {
 
             inline static  int64_t sign_extend_32(int32_t x) { return (int64_t)x; }
             inline static  uint64_t mask64(uint64_t x) { return x & 0xFFFFFFFFFFFFFFFFULL; }
-    };
 
+            // Divider
+            static uint32_t DIVU(uint32_t p_OpA, uint32_t p_OpB);
+            static uint32_t DIV(int32_t p_OpA, int32_t p_OpB);
+            static uint32_t REMU(uint32_t p_OpA, uint32_t p_OpB);
+            static uint32_t REM(int32_t p_OpA, int32_t p_OpB);
+    };
 }
 
 #endif

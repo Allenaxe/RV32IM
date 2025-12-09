@@ -27,8 +27,7 @@ namespace RV32IM {
     //  Radix-4 Booth recoding (returns 16 booth codes)
     //  code = {-2, -1, 0, +1, +2}
     // ============================================================
-    std::array<int,16> ALU::booth_radix4(int64_t b)
-    {
+    std::array<int,16> ALU::booth_radix4 (int64_t b) {
         std::array<int,16> code{};
         int64_t ext = (b << 1); // append implicit b[-1] = 0
 
@@ -49,9 +48,8 @@ namespace RV32IM {
     // ============================================================
     //  Partial product generation (16 partial products)
     // ============================================================
-    std::vector<uint64_t> ALU::booth_partial_products(
-        int64_t a, const std::array<int,16>& code)
-    {
+    std::vector<uint64_t> ALU::booth_partial_products (
+        int64_t a, const std::array<int,16>& code) {
         std::vector<uint64_t> pp(16);
 
         for (int i = 0; i < 16; i++) {
@@ -76,9 +74,8 @@ namespace RV32IM {
     // ============================================================
     //  64-bit Carry-Save Adder (逐 bit)
     // ============================================================
-    std::pair<uint64_t,uint64_t> ALU::csa_64(
-        uint64_t x, uint64_t y, uint64_t z)
-    {
+    std::pair<uint64_t,uint64_t> ALU::csa_64 (
+        uint64_t x, uint64_t y, uint64_t z) {
         uint64_t sum = 0, carry = 0;
 
         for (int i = 0; i < 64; i++) {
@@ -98,8 +95,7 @@ namespace RV32IM {
     // ============================================================
     //  64-bit ripple-carry adder (最後 CPA)
     // ============================================================
-    uint64_t ALU::ripple_adder_64(uint64_t a, uint64_t b)
-    {
+    uint64_t ALU::ripple_adder_64 (uint64_t a, uint64_t b) {
         uint64_t result = 0;
         uint64_t carry  = 0;
 
@@ -119,10 +115,8 @@ namespace RV32IM {
     // ============================================================
     //  Wallace Tree reduction (經典 Wallace 3→2)
     // ============================================================
-    uint64_t ALU::wallace_tree(const std::vector<uint64_t>& pp)
-    {
+    uint64_t ALU::wallace_tree (const std::vector<uint64_t>& pp) {
         std::vector<uint64_t> layer = pp;
-
         while (layer.size() > 2)
         {
             std::vector<uint64_t> next;
@@ -147,15 +141,13 @@ namespace RV32IM {
     // ============================================================
     //  Top-level signed / unsigned multiply paths
     // ============================================================
-    uint64_t ALU::mul64_signed(int64_t a, int64_t b)
-    {
+    uint64_t ALU::mul64_signed (int64_t a, int64_t b) {
         auto code = booth_radix4(b);
         auto pp   = booth_partial_products(a, code);
         return wallace_tree(pp);
     }
 
-    uint64_t ALU::mul64_mixed(int64_t a, uint64_t b)
-    {
+    uint64_t ALU::mul64_mixed (int64_t a, uint64_t b) {
         auto code = booth_radix4((int64_t)b);
         auto pp   = booth_partial_products(a, code);
         return wallace_tree(pp);
@@ -171,28 +163,82 @@ namespace RV32IM {
     // ============================================================
     //  RISC-V public APIs
     // ============================================================
-    uint32_t ALU::MUL(uint32_t a, uint32_t b)
+    uint32_t ALU::MUL(uint32_t p_OpA, uint32_t p_OpB)
     {
-        uint64_t r = mul64_signed((int32_t)a, (int32_t)b);
+        uint64_t r = mul64_signed((int32_t)p_OpA, (int32_t)p_OpB);
         return (uint32_t)(r & 0xFFFFFFFFULL);
     }
 
-    uint32_t ALU::MULH(int32_t a, int32_t b)
+    uint32_t ALU::MULH(int32_t p_OpA, int32_t p_OpB)
     {
-        uint64_t r = mul64_signed(a, b);
+        uint64_t r = mul64_signed(p_OpA, p_OpB);
         return (uint32_t)(r >> 32);
     }
     
-    uint32_t ALU::MULHSU(int32_t a, uint32_t b)
+    uint32_t ALU::MULHSU(int32_t p_OpA, uint32_t p_OpB)
     {
-        uint64_t r = mul64_mixed(a, b);
+        uint64_t r = mul64_mixed(p_OpA, p_OpB);
         return (uint32_t)(r >> 32);
     }
 
-    uint32_t ALU::MULHU(uint32_t a, uint32_t b)
+    uint32_t ALU::MULHU(uint32_t p_OpA, uint32_t p_OpB)
     {
-        uint64_t r = mul64_unsigned(a, b);
+        uint64_t r = mul64_unsigned(p_OpA, p_OpB);
         return (uint32_t)(r >> 32);
+    }
+
+    uint32_t ALU::DIVU(uint32_t p_OpA, uint32_t p_OpB) {
+        uint32_t quotient = 0;
+        uint32_t remainder = 0;
+
+        for (int i = 31; i >= 0; --i) {
+            remainder = (remainder << 1) | ((p_OpA >> i) & 1);
+            if (remainder >= p_OpB) {
+                remainder -= p_OpB;
+                quotient |= (1u << i);
+            }
+        }
+        return quotient;
+    }
+
+    uint32_t ALU::DIV(int32_t p_OpA, int32_t p_OpB) {
+        bool negQuotient = (p_OpA < 0) ^ (p_OpB < 0);
+
+        uint32_t absDividend = (p_OpA < 0) ? -uint32_t(p_OpA) : uint32_t(p_OpA);
+        uint32_t absDivisor  = (p_OpB  < 0) ? -uint32_t(p_OpB)  : uint32_t(p_OpB);
+
+        uint32_t quotient = DIVU(absDividend, absDivisor);
+
+        if (negQuotient) quotient = -int32_t(quotient);
+
+        return quotient;
+    }
+
+    uint32_t ALU::REMU(uint32_t p_OpA, uint32_t p_OpB) {
+        uint32_t quotient = 0;
+        uint32_t remainder = 0;
+
+        for (int i = 31; i >= 0; --i) {
+            remainder = (remainder << 1) | ((p_OpA >> i) & 1);
+            if (remainder >= p_OpB) {
+                remainder -= p_OpB;
+                quotient |= (1u << i);
+            }
+        }
+        return remainder;
+    }
+
+    uint32_t ALU::REM(int32_t p_OpA, int32_t p_OpB) {
+        bool negRemainder = (p_OpA < 0);
+
+        uint32_t absDividend = (p_OpA < 0) ? -uint32_t(p_OpA) : uint32_t(p_OpA);
+        uint32_t absDivisor  = (p_OpB  < 0) ? -uint32_t(p_OpB)  : uint32_t(p_OpB);
+
+        uint32_t reminder = REMU(absDividend, absDivisor);
+
+        if (negRemainder) reminder = -int32_t(reminder);
+
+        return reminder;
     }
 
     // Determine calculate type
@@ -394,7 +440,7 @@ namespace RV32IM {
 
             case ALU_OP_TYPE::M_Extension: {
 
-                switch (p_ALUFunct.to_ulong()) {
+                switch ((p_ALUFunct >> 1).to_ulong()) {
                     // MUL
                     case 0b000:
                         return MUL(p_OpA, p_OpB);
@@ -411,6 +457,18 @@ namespace RV32IM {
                     // MULHU
                     case 0b011:
                         return MULHU(p_OpA, p_OpB);
+
+                    case 0b100:
+                        return DIV(p_OpA, p_OpB);
+
+                    case 0b101:
+                        return DIVU(p_OpA, p_OpB);
+
+                    case 0b110:
+                        return REM(p_OpA, p_OpB);
+
+                    case 0b111:
+                        return REMU(p_OpA, p_OpB);
 
                     default:
                         std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;

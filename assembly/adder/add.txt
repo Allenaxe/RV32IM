@@ -1,0 +1,5 @@
+addi x1, x0, 123
+addi x2, x0, 456
+add x3, x1, x2
+addi x17, x0, 93
+ecall
