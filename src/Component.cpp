@@ -16,7 +16,7 @@ namespace RV32IM {
             Register[rd] = p_WriteData;
     }
 
-    ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3) {
+    ControlSignal ControlUnit::Generate (std::bitset<7> &p_Opcode, std::bitset<3> &p_funct3, std::bitset<7> &p_funct7) {
         bool isRType = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];        // if p_Opcode == 0b0110011
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];     // if p_Opcode == 0b0010011
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];     // if p_Opcode == 0b0100011
@@ -40,12 +40,13 @@ namespace RV32IM {
         bool Halt = isECALL;
 
         ALU_OP_TYPE ALUOp =
-            isRType ? ALU_OP_TYPE::R_TYPE :
-            isIType ? ALU_OP_TYPE::I_TYPE :
-            Branch  ? ALU_OP_TYPE::BRANCH :
-            isLUI   ? ALU_OP_TYPE::LUI :
-            isAUIPC ? ALU_OP_TYPE::AUIPC :
-                      ALU_OP_TYPE::MEMORY_REF;
+            (isRType & p_funct7[0])    ? ALU_OP_TYPE::M_Extension :
+            (isRType & (~p_funct7[0])) ? ALU_OP_TYPE::R_TYPE :
+            isIType                    ? ALU_OP_TYPE::I_TYPE :
+            Branch                     ? ALU_OP_TYPE::BRANCH :
+            isLUI                      ? ALU_OP_TYPE::LUI :
+            isAUIPC                    ? ALU_OP_TYPE::AUIPC :
+                                         ALU_OP_TYPE::MEMORY_REF;
 
         MEM_SIZE MemSize = static_cast<MEM_SIZE>(p_funct3.to_ulong() & 0b11);
 

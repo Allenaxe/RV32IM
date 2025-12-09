@@ -27,12 +27,13 @@ namespace RV32IM {
 
     // Types of ALU operation (the signal which decoder sending to ALU)
     enum class ALU_OP_TYPE : uint8_t {
-        MEMORY_REF = 0,         // Load/Store (Bit: 000)
-        BRANCH     = 1,         // Branch     (Bit: 001)
-        R_TYPE     = 2,         // R-Type     (Bit: 010)
-        I_TYPE     = 3,         // I-Type     (Bit: 011)
-        LUI        = 4,         // LUI        (Bit: 100)
-        AUIPC      = 5          // AUIPC      (Bit: 101)
+        MEMORY_REF  = 0,         // Load/Store  (Bit: 000)
+        BRANCH      = 1,         // Branch      (Bit: 001)
+        R_TYPE      = 2,         // R-Type      (Bit: 010)
+        I_TYPE      = 3,         // I-Type      (Bit: 011)
+        LUI         = 4,         // LUI         (Bit: 100)
+        AUIPC       = 5,         // AUIPC       (Bit: 101)
+        M_Extension = 6,         // M-Extension (Bit: 110)
     };
 
     struct ExecuteSignal {

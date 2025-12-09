@@ -23,6 +23,178 @@ namespace RV32IM {
         return (int32_t)result;
     }
 
+    // ============================================================
+    //  Radix-4 Booth recoding (returns 16 booth codes)
+    //  code = {-2, -1, 0, +1, +2}
+    // ============================================================
+    std::array<int,16> ALU::booth_radix4(int64_t b)
+    {
+        std::array<int,16> code{};
+        int64_t ext = (b << 1); // append implicit b[-1] = 0
+
+        for (int i = 0; i < 16; i++) {
+            int bits = (ext >> (2*i)) & 0b111; // 3-bit window
+
+            switch(bits) {
+                case 0b000: case 0b111: code[i] = 0;  break;
+                case 0b001: case 0b010: code[i] = +1; break;
+                case 0b011:             code[i] = +2; break;
+                case 0b100:             code[i] = -2; break;
+                case 0b101: case 0b110: code[i] = -1; break;
+            }
+        }
+        return code;
+    }
+
+    // ============================================================
+    //  Partial product generation (16 partial products)
+    // ============================================================
+    std::vector<uint64_t> ALU::booth_partial_products(
+        int64_t a, const std::array<int,16>& code)
+    {
+        std::vector<uint64_t> pp(16);
+
+        for (int i = 0; i < 16; i++) {
+            int c = code[i];
+            int64_t p = 0;
+
+            switch(c) {
+                case 0:  p = 0; break;
+                case +1: p = a; break;
+                case -1: p = -a; break;
+                case +2: p = (a << 1); break;
+                case -2: p = -(a << 1); break;
+            }
+
+            // shift according to booth group
+            uint64_t shifted = ((uint64_t)p) << (2 * i);
+            pp[i] = shifted;
+        }
+        return pp;
+    }
+
+    // ============================================================
+    //  64-bit Carry-Save Adder (逐 bit)
+    // ============================================================
+    std::pair<uint64_t,uint64_t> ALU::csa_64(
+        uint64_t x, uint64_t y, uint64_t z)
+    {
+        uint64_t sum = 0, carry = 0;
+
+        for (int i = 0; i < 64; i++) {
+            uint64_t a = (x >> i) & 1ULL;
+            uint64_t b = (y >> i) & 1ULL;
+            uint64_t c = (z >> i) & 1ULL;
+
+            uint64_t s = a ^ b ^ c;
+            uint64_t g = (a & b) | (b & c) | (c & a);
+
+            sum   |= (s << i);
+            carry |= (g << i);
+        }
+        return {sum, carry << 1};
+    }
+
+    // ============================================================
+    //  64-bit ripple-carry adder (最後 CPA)
+    // ============================================================
+    uint64_t ALU::ripple_adder_64(uint64_t a, uint64_t b)
+    {
+        uint64_t result = 0;
+        uint64_t carry  = 0;
+
+        for (int i = 0; i < 64; i++) {
+            uint64_t x = (a >> i) & 1ULL;
+            uint64_t y = (b >> i) & 1ULL;
+
+            uint64_t s = x ^ y ^ carry;
+            uint64_t g = (x & y) | (y & carry) | (carry & x);
+
+            result |= (s << i);
+            carry = g;
+        }
+        return result;
+    }
+
+    // ============================================================
+    //  Wallace Tree reduction (經典 Wallace 3→2)
+    // ============================================================
+    uint64_t ALU::wallace_tree(const std::vector<uint64_t>& pp)
+    {
+        std::vector<uint64_t> layer = pp;
+
+        while (layer.size() > 2)
+        {
+            std::vector<uint64_t> next;
+
+            size_t i = 0;
+            for (; i + 2 < layer.size(); i += 3) {
+                auto [s, c] = csa_64(layer[i], layer[i+1], layer[i+2]);
+                next.push_back(s);
+                next.push_back(c);
+            }
+            // remaining 1 or 2 terms
+            for (; i < layer.size(); i++)
+                next.push_back(layer[i]);
+
+            layer = next;
+        }
+
+        // Final CPA to get full 64-bit product
+        return ripple_adder_64(layer[0], layer[1]);
+    }
+
+    // ============================================================
+    //  Top-level signed / unsigned multiply paths
+    // ============================================================
+    uint64_t ALU::mul64_signed(int64_t a, int64_t b)
+    {
+        auto code = booth_radix4(b);
+        auto pp   = booth_partial_products(a, code);
+        return wallace_tree(pp);
+    }
+
+    uint64_t ALU::mul64_mixed(int64_t a, uint64_t b)
+    {
+        auto code = booth_radix4((int64_t)b);
+        auto pp   = booth_partial_products(a, code);
+        return wallace_tree(pp);
+    }
+
+    uint64_t ALU::mul64_unsigned(uint64_t a, uint64_t b)
+    {
+        auto code = booth_radix4((int64_t)b);
+        auto pp   = booth_partial_products((int64_t)a, code);
+        return wallace_tree(pp);
+    }
+
+    // ============================================================
+    //  RISC-V public APIs
+    // ============================================================
+    uint32_t ALU::MUL(uint32_t a, uint32_t b)
+    {
+        uint64_t r = mul64_signed((int32_t)a, (int32_t)b);
+        return (uint32_t)(r & 0xFFFFFFFFULL);
+    }
+
+    uint32_t ALU::MULH(int32_t a, int32_t b)
+    {
+        uint64_t r = mul64_signed(a, b);
+        return (uint32_t)(r >> 32);
+    }
+    
+    uint32_t ALU::MULHSU(int32_t a, uint32_t b)
+    {
+        uint64_t r = mul64_mixed(a, b);
+        return (uint32_t)(r >> 32);
+    }
+
+    uint32_t ALU::MULHU(uint32_t a, uint32_t b)
+    {
+        uint64_t r = mul64_unsigned(a, b);
+        return (uint32_t)(r >> 32);
+    }
+
     // Determine calculate type
     // @Return: bitset<4> {funct3 (3 bit) + funct7 (1 bit)}
     std::bitset<4> ALU::AluControl (uint32_t p_funct3, uint32_t p_funct7) {
@@ -32,20 +204,20 @@ namespace RV32IM {
         return type;
     }
 
-    int32_t ALU::Generate_OpA (const uint32_t PC, uint32_t p_Src1, bool p_Selector) {
+    uint32_t ALU::Generate_OpA (const uint32_t PC, uint32_t p_Src1, bool p_Selector) {
         // signal: Branch / Jump = 1
-        return p_Selector ? static_cast<int32_t>(PC): static_cast<int32_t>(p_Src1);
+        return p_Selector ? PC : p_Src1;
     }
 
-    int32_t ALU::Generate_OpB (uint32_t p_Src2, const int32_t imm, bool p_Selector) {
+    uint32_t ALU::Generate_OpB (uint32_t p_Src2, const int32_t imm, bool p_Selector) {
         // signal: ALUsrc = 1
-        return p_Selector ? static_cast<int32_t>(imm) : static_cast<int32_t>(p_Src2);
+        return p_Selector ? imm : p_Src2;
     }
 
-    int32_t ALU::Operate (std::bitset<4> p_ALUFunct,
+    uint32_t ALU::Operate (std::bitset<4> p_ALUFunct,
                           ALU_OP_TYPE p_ALUOp,
-                          int32_t p_OpA,
-                          int32_t p_OpB)
+                          uint32_t p_OpA,
+                          uint32_t p_OpB)
     {
         bool carryOut = false; // Carry Flag
         uint32_t complement;
@@ -213,6 +385,32 @@ namespace RV32IM {
                     case 0b1110:
                     case 0b1111:
                         return p_OpA & p_OpB;
+
+                    default:
+                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        return 0;
+                }
+            }
+
+            case ALU_OP_TYPE::M_Extension: {
+
+                switch (p_ALUFunct.to_ulong()) {
+                    // MUL
+                    case 0b000:
+                        return MUL(p_OpA, p_OpB);
+
+                    // MULH
+                    case 0b001:
+                        return MULH(p_OpA, p_OpB);
+
+
+                    // MULSHU
+                    case 0b010:
+                        return MULHSU(p_OpA, p_OpB);
+
+                    // MULHU
+                    case 0b011:
+                        return MULHU(p_OpA, p_OpB);
 
                     default:
                         std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;

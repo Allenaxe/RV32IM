@@ -55,9 +55,7 @@ namespace RV32IM {
 
         public:
             CPU(std::unique_ptr<Segmentation>& p_ProgSeg,
-                std::string p_Filename,
-                std::string p_TableFilename,
-                bool p_ConsoleOutput);
+                std::string p_TableFilename);
             // ~CPU();
             // void Reset();
             void Run();
