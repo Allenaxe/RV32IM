@@ -27,14 +27,10 @@ namespace RV32IM {
         private:
             std::vector<CycleSnapshot> History;
             CycleSnapshot CurrentCycleSnapshot;
-            std::ofstream LogFile;
             std::ofstream TableLogFile;
-            bool ConsoleOutput;
 
         public:
-            Printer(const std::string& Filename,
-                    const std::string& TableFilename,
-                    bool toConsole);
+            Printer(const std::string& TableFilename);
             ~Printer();
 
             void RecordState(const IF_ID_Data& p_Data);
@@ -44,18 +40,18 @@ namespace RV32IM {
             void RecordState(const WB_Data& p_Ddata);
             void RecordState (RegisterFile* RF);
             void EndCycle(int cycle_num);
-            void PrintTrace();
+            // void PrintTrace();
             void PrintTable ();
 
-            void PrintState(std::ostream& os, const IF_ID_Data& data);
-            void PrintState(std::ostream& os, const ID_EX_Data& data);
-            void PrintState(std::ostream& os, const EX_MEM_Data& data);
-            void PrintState(std::ostream& os, const MEM_WB_Data& data);
-            void PrintState(std::ostream& os, const WB_Data& out);
+            // void PrintState(std::ostream& os, const IF_ID_Data& data);
+            // void PrintState(std::ostream& os, const ID_EX_Data& data);
+            // void PrintState(std::ostream& os, const EX_MEM_Data& data);
+            // void PrintState(std::ostream& os, const MEM_WB_Data& data);
+            // void PrintState(std::ostream& os, const WB_Data& out);
 
-            void WriteRaw(const std::string& message);
+            // void WriteRaw(const std::string& message);
 
-            void PrintRegisters(RegisterFile* RF);
+            // void PrintRegisters(RegisterFile* RF);
     };
 
 }

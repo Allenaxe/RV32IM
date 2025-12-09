@@ -6,9 +6,7 @@
 int main(int argc, char* argv[]) {
 
     std::string machineCodeFile = "machine_codes.txt";
-    std::string logFile         = "Log.txt";
     std::string table_filename  = "Log_table.txt";
-    bool consoleOutput          = true;
 
     // Argument parser
     for (int i = 1; i < argc; ++i) {
@@ -16,12 +14,10 @@ int main(int argc, char* argv[]) {
         if (arg == "-m" && i + 1 < argc) {
             machineCodeFile = argv[++i];
         } else if (arg == "-l" && i + 1 < argc) {
-            logFile = argv[++i];
-        } else if (arg == "--no-console") {
-            consoleOutput = false;
+            table_filename = argv[++i];
         } else {
             std::cerr << "Unknown argument: " << arg << std::endl;
-            std::cerr << "Usage: " << argv[0] << " [-m machine_code_file] [-l log_file] [--no-console]\n";
+            std::cerr << "Usage: " << argv[0] << " [-m machine_code_file] [-l table_logfile] [--no-console]\n";
             return 1;
         }
     }
@@ -33,7 +29,7 @@ int main(int argc, char* argv[]) {
     std::cout << mySeg -> START_ADDR << " " << mySeg -> DATA_ADDR << " " << mySeg -> BSS_ADDR << " "
               << mySeg -> HEAP_ADDR << " " << mySeg -> END_ADDR << std::endl;
 
-    RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, logFile, table_filename, consoleOutput);
+    RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, table_filename);
     cpu->Run();
 
 }

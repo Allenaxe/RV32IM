@@ -5,12 +5,10 @@
 namespace RV32IM {
 
     CPU::CPU (std::unique_ptr<Segmentation>& p_ProgSeg,
-              std::string Filename,
-              std::string TableFilename,
-              bool ConsoleOutput)
+              std::string TableFilename)
         : RF(new RegisterFile()),
           DM(new DataMemory(p_ProgSeg)),
-          Record(new Printer(Filename, TableFilename, ConsoleOutput))
+          Record(new Printer(TableFilename))
     {
         PC = DM->seg->START_ADDR;
         IF_ID = {};
@@ -35,7 +33,7 @@ namespace RV32IM {
         std::bitset<7> funct7       {(p_DecodeInput.inst & 0xFE00'0000) >> 25};    // IR[25:31]
 
         uint32_t imm = ImmediateGenerator::Generate(p_DecodeInput.inst);
-        ControlSignal control_signal = ControlUnit::Generate(opcode, funct3);
+        ControlSignal control_signal = ControlUnit::Generate(opcode, funct3, funct7);
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
 
@@ -152,8 +150,6 @@ namespace RV32IM {
         }
 
         // After Loop
-        Record->PrintTrace();
-        Record->PrintRegisters(RF);
         Record->PrintTable();
     }
 }
