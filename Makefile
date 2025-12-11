@@ -10,6 +10,7 @@ TARGET    := cpu_simulator
 SRC_DIR   := src
 INC_DIR   := include
 BUILD_DIR := build
+RESULT_DIR := result
 
 # Find all .cpp files
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
@@ -41,7 +42,7 @@ $(BUILD_DIR):
 #       Utilities
 # ==========================
 clean:
-	rm -rf $(BUILD_DIR) $(TARGET)
+	rm -rf $(BUILD_DIR) $(TARGET) $(RESULT_DIR)
 
 rebuild: clean all
 

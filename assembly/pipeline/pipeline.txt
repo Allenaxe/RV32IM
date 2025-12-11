@@ -1,0 +1,7 @@
+ADDI t1, zero, 5        // t1 = 5
+ADDI t3, zero, 0x0F     // t3 = 15
+ADD t2, t1, t3          // t2 = t1 + t3 = 5 + 15 = 20
+SUB t4, t2, t1          // t4 = t2 - t1 = 20 - 5 = 15
+ORI t5, t1, 2           // t5 = t1 or 2 = 0b101 | 0b10 = 0b111 = 7
+ADDI a7, zero, 93       // Exit argument
+ECALL                   // System call
