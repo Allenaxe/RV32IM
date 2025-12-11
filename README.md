@@ -1,11 +1,19 @@
-# The Specification of CPU Simulator Based on RV32IM
+# CPU Simulator Based on RV32IM
 
 This is a simulation CPU based on RV32IM.
 
-Features:
+## 0. Features & Usage
+
+### Features
 - Highly consistent with the physical design.
 - Pipeline structure is implemented.
 - Provide runtime details.
+
+### Usage
+
+This simulator currectly support machine code for now. Put your .txt file that contains binary instructions in `testcase/` folder, run `./cpu_simulator` at the top folder, and find the result in `result/` folder.
+
+There's another point needs to be awared. The temination signal is triggered by detecting `ECALL` instruction, so make sure that `ECALL` is the final instruction in your machine code file.
 
 
 ## 1. Structure
@@ -52,7 +60,7 @@ It also have a method `Clear()` which will clear all data in allocated memory.
 
 ### 2.2 Segmentation
 
-`Segmentation` class inherits `MainMemory` class, which controls the segmentation of each program, so it can be more than one.
+`Segmentation` class inherits `MainMemory` class, which controls the segmentation of each program, so there can be more than one.
 
 It might be weird for this CPU simulator, because it's one of the jobs that operating system handles. To better controls the valid memory area where a program can access, we finally decide to add segmentation into this project.
 
@@ -75,15 +83,16 @@ public:
     void Write (const uint32_t& p_Address, const uint32_t& p_Value, std::bitset<4> p_ByteMask = std::bitset<4>("1111"));
 ```
 
-It's similar to `MainMemory`, `Segmentation` has some constants which defined each segmentation, but they are **public** for program to use.
+Similar to `MainMemory`, `Segmentation` has some constants which defined each segmentation, but they are **public** for program to use.
 `START_ADDR`: the lowest address of segmentation, which is also the starting address of text section.
 `DATA_ADDR`: the starting address of data section.
 `BSS_ADDR`: the starting address of BSS section.
 `HEAP_ADDR`: the starting address of heap section.
 `END_ADDR`: the highest address of segmentation, which is also the starting address of stack section. Note that stack section will grow from high address to low address.
 
-Constructor: Given the starting/ending address to allocated it on our main memory. The parameter `TextLength` denotes the instrution  length in bytes, which will make data section fit the length of program.<br>
-`Read()`: Read the word at given memory address.<br>
+Some member functions
+Constructor: Given the starting/ending address to allocated it on our main memory. The parameter `TextLength` denotes the instrution  length in bytes, which will make data section fit the length of program.
+`Read()`: Read the word at given memory address.
 `Write()`: Write the word at given memory address. It will decide which byte/half word or word to write. Fetch the word at that address, reconstruct data, and then write back to at address.
 
 
@@ -160,8 +169,8 @@ class RegisterFile {
 };
 ```
 
-Register file provide the interface between read from and write to  register.<br>
-`Read()`: It reads both `rs1` and `rs2` at one time.<br>
+Register file provide the interface between read from and write to  register.
+`Read()`: It reads both `rs1` and `rs2` at one time.
 `Write()`: If singal `WriteEnable` is true, write `WriteData` to register `rd`.
 
 
@@ -189,18 +198,18 @@ In order to know which calculation to perform, ALU also need two signals:
 
 The core of ALU is adder. We implement this in the full-adder way, so it will do bit operations at each bit and return the final result.
 
-If we want to do pipelining and try to reach best performance, the forwarding unit is necessary. <br>
-We have two multiplexers. They are doing the same thing, which is identify the `rs` (both `rs1` and `rs2`, that's why we have two multiplexers) of current instruction as same as `rd` from previous **two** instructions. As for which `rd` will be forwarded, from execution stage or memory stage, it will be determined by the signal `RegWrite` of those instructions.
+If we want to do pipelining and try to reach best performance, the forwarding unit is necessary.
+We have two multiplexers. They are doing the same thing, which is identifying the `rs` (both `rs1` and `rs2`, that's why we have two multiplexers) of current instruction as same as `rd` from previous **two** instructions. As for which `rd` will be forwarded, from execution stage or memory stage, it will be determined by the signal `RegWrite` of those instructions.
 
 
 ## 8. ALU Control
 
-As mentioned before, ALU control generates `p_ALUFunct`. It determine the unique arithmetic operation that ALU will perform by `funct3` and `funct7` which specified by RISC-V to indicating acutal ALU operations.
+As mentioned before, ALU control generates `p_ALUFunct`. It determines the unique arithmetic operation that ALU will perform by `funct3` and `funct7` which specified by RISC-V to indicating acutal ALU operations.
 
 
 ## 9. Load Store Unit (LSU)
 
-It's the component which determine the address of memory accessing is aligned/unaligned, and also returns a byte mask which indicates which bytes in a word to read from or write to memory.
+It's the component which determining the address of memory accessing is aligned/unaligned, and also returns a byte mask that indicating which bytes in a word are needed to read from or write to memory.
 
 ``` C++
 public:
@@ -293,27 +302,25 @@ File structure shown below
     └── Printer.cpp
 ```
 
-And we put the all diagrams (datapath and UML) in the folder of `docs/`, including  a complete diagram and separated diagrams for each class.
+And we put the all UML diagrams in the foler of `docs/`, including  a complete diagram and separated diagrams for each class.
 
 
-## 12. Future Work
+## 12. Future Works
 
-Since this was a final project for a class, we tried our best to make the current results within a month. Some features that haven't been implemented yet may make it look less like a true RISC-V CPU.
-
-Missing features including but not limit to:
+Since this was a final project for a class, we tried our best to make the current results within a month. Some features that haven't been implemented yet may make it look less like a true RISC-V CPU. This missing feature including but not limit to:
 - Flexibility of address defined in segmentation
 - Hardware trap
+- Privilege instructions
 
 ## 13. Dependencies and Tools
 
-Some open projects faciliate our work, and they are worth to be mentioned here!
+Some open projects faciliate our work. They are worth to mentioned here!
 
-- [**drawio**](https://github.com/jgraph/drawio): For drawing digram of datapath.
 - [**clang-uml**](https://github.com/bkryza/clang-uml): For generating UML graph.
 
 
 ## 14. Contribution
 
-- doctorxsx <allen31042@gmail.com>
-- smolsquirrel936 <smolsquirrel936@gmail.com>
-- yus091 <ysheng910316@gmail.com>
+doctorxsx <allen31042@gmail.com>
+smolsquirrel936 <smolsquirrel936@gmail.com>
+yus091 <ysheng910316@gmail.com>
