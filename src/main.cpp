@@ -39,21 +39,21 @@ int main() {
         for (const auto& fileEntry : std::filesystem::directory_iterator(testcase)) {
             if(!fileEntry.is_regular_file())
                 continue;
-                
+
             std::filesystem::path machineCodeFile = fileEntry.path();
-            std::unique_ptr<RV32IM::Segmentation> mySeg = myLoader.Load(machineCodeFile, myMemory);
+            std::unique_ptr<RV32IM::Segmentation> mySeg = myLoader.Load(machineCodeFile);
             std::cout << mySeg -> START_ADDR << " " << mySeg -> DATA_ADDR << " " << mySeg -> BSS_ADDR << " "
                     << mySeg -> HEAP_ADDR << " " << mySeg -> END_ADDR << std::endl;
 
             std::filesystem::path relativePath = std::filesystem::relative(testcase, test_root);
-            
+
             std::filesystem::path result = result_root / relativePath;
 
             if (!std::filesystem::exists(result))
                 std::filesystem::create_directories(result);
 
             result = result / machineCodeFile.filename();
-            
+
             RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, result.string());
             cpu->Run();
         }

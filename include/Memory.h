@@ -33,7 +33,6 @@ namespace RV32IM {
         private:
             // Helper functions
             uint32_t AddrTranslate (const uint32_t p_Address);
-            uint32_t EndianceToggle (uint32_t p_Data);
 
         public:
             const uint32_t START_ADDR;      // Text section starts here

@@ -19,7 +19,7 @@ namespace RV32IM{
 
         public:
             Loader();
-            std::unique_ptr<Segmentation> Load(std::string p_filename, MainMemory &p_memory);
+            std::unique_ptr<Segmentation> Load(std::string p_filename);
     };
 
 }
