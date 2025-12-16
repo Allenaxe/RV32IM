@@ -106,6 +106,7 @@ namespace RV32IM {
 
         // Main loop for execution
         while (true) {
+            // In order to prevent read-after-write hazard, the order of stages is reversed
 
             // Write-Back (WB) Stage
             MEM_WB_Data writeback_input = MEM_WB.Read();

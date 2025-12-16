@@ -29,13 +29,13 @@ namespace RV32IM {
     // ============================================================
     std::array<int,16> ALU::booth_radix4 (int64_t b) {
         std::array<int,16> code{};
-        int64_t ext = (b << 1); // append implicit b[-1] = 0
+        int64_t ext = (b << 1);         // append implicit b[-1] = 0
 
         for (int i = 0; i < 16; i++) {
             int bits = (ext >> (2*i)) & 0b111; // 3-bit window
 
             switch(bits) {
-                case 0b000: case 0b111: code[i] = 0;  break;
+                case 0b000: case 0b111: code[i] =  0; break;
                 case 0b001: case 0b010: code[i] = +1; break;
                 case 0b011:             code[i] = +2; break;
                 case 0b100:             code[i] = -2; break;
@@ -57,22 +57,22 @@ namespace RV32IM {
             int64_t p = 0;
 
             switch(c) {
-                case 0:  p = 0; break;
-                case +1: p = a; break;
-                case -1: p = -a; break;
-                case +2: p = (a << 1); break;
+                case 0:  p = 0;         break;
+                case +1: p = a;         break;
+                case -1: p = -a;        break;
+                case +2: p = (a << 1);  break;
                 case -2: p = -(a << 1); break;
             }
 
-            // shift according to booth group
-            uint64_t shifted = ((uint64_t)p) << (2 * i);
+            // Shift according to the booth group
+            uint64_t shifted = static_cast<uint64_t>(p) << (2 * i);
             pp[i] = shifted;
         }
         return pp;
     }
 
     // ============================================================
-    //  64-bit Carry-Save Adder (逐 bit)
+    //  64-bit carry-save adder (Process through each bit)
     // ============================================================
     std::pair<uint64_t,uint64_t> ALU::csa_64 (
         uint64_t x, uint64_t y, uint64_t z) {
@@ -93,7 +93,7 @@ namespace RV32IM {
     }
 
     // ============================================================
-    //  64-bit ripple-carry adder (最後 CPA)
+    //  64-bit ripple-carry adder (Last CPA)
     // ============================================================
     uint64_t ALU::ripple_adder_64 (uint64_t a, uint64_t b) {
         uint64_t result = 0;
@@ -113,7 +113,7 @@ namespace RV32IM {
     }
 
     // ============================================================
-    //  Wallace Tree reduction (經典 Wallace 3→2)
+    //  Wallace Tree reduction (Classic Wallace 3→2)
     // ============================================================
     uint64_t ALU::wallace_tree (const std::vector<uint64_t>& pp) {
         std::vector<uint64_t> layer = pp;
@@ -148,15 +148,15 @@ namespace RV32IM {
     }
 
     uint64_t ALU::mul64_mixed (int64_t a, uint64_t b) {
-        auto code = booth_radix4((int64_t)b);
+        auto code = booth_radix4(static_cast<int64_t>(b));
         auto pp   = booth_partial_products(a, code);
         return wallace_tree(pp);
     }
 
     uint64_t ALU::mul64_unsigned(uint64_t a, uint64_t b)
     {
-        auto code = booth_radix4((int64_t)b);
-        auto pp   = booth_partial_products((int64_t)a, code);
+        auto code = booth_radix4(static_cast<int64_t>(b));
+        auto pp   = booth_partial_products(static_cast<int64_t>(a), code);
         return wallace_tree(pp);
     }
 
@@ -165,7 +165,7 @@ namespace RV32IM {
     // ============================================================
     uint32_t ALU::MUL(uint32_t p_OpA, uint32_t p_OpB)
     {
-        uint64_t r = mul64_signed((int32_t)p_OpA, (int32_t)p_OpB);
+        uint64_t r = mul64_signed(static_cast<int64_t>(p_OpA), static_cast<int64_t>(p_OpB));
         return (uint32_t)(r & 0xFFFFFFFFULL);
     }
 
@@ -174,7 +174,7 @@ namespace RV32IM {
         uint64_t r = mul64_signed(p_OpA, p_OpB);
         return (uint32_t)(r >> 32);
     }
-    
+
     uint32_t ALU::MULHSU(int32_t p_OpA, uint32_t p_OpB)
     {
         uint64_t r = mul64_mixed(p_OpA, p_OpB);
@@ -204,8 +204,8 @@ namespace RV32IM {
     uint32_t ALU::DIV(int32_t p_OpA, int32_t p_OpB) {
         bool negQuotient = (p_OpA < 0) ^ (p_OpB < 0);
 
-        uint32_t absDividend = (p_OpA < 0) ? -uint32_t(p_OpA) : uint32_t(p_OpA);
-        uint32_t absDivisor  = (p_OpB  < 0) ? -uint32_t(p_OpB)  : uint32_t(p_OpB);
+        uint32_t absDividend = (p_OpA < 0) ? ~static_cast<uint32_t>(p_OpA) + 1 : static_cast<uint32_t>(p_OpA);
+        uint32_t absDivisor  = (p_OpB < 0) ? ~static_cast<uint32_t>(p_OpB) + 1 : static_cast<uint32_t>(p_OpB);
 
         uint32_t quotient = DIVU(absDividend, absDivisor);
 
@@ -232,7 +232,7 @@ namespace RV32IM {
         bool negRemainder = (p_OpA < 0);
 
         uint32_t absDividend = (p_OpA < 0) ? -uint32_t(p_OpA) : uint32_t(p_OpA);
-        uint32_t absDivisor  = (p_OpB  < 0) ? -uint32_t(p_OpB)  : uint32_t(p_OpB);
+        uint32_t absDivisor  = (p_OpB < 0) ? -uint32_t(p_OpB) : uint32_t(p_OpB);
 
         uint32_t reminder = REMU(absDividend, absDivisor);
 
@@ -331,7 +331,8 @@ namespace RV32IM {
                             return p_OpA + 4;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string err_msg = std::format("ALU M-ext: Invalid funct3: {}", (p_ALUFunct >> 1).to_ulong());
+                        throw RV32IM::ValueError (err_msg);
                         return 0;
                 }
             }
@@ -381,7 +382,8 @@ namespace RV32IM {
                         return p_OpA & p_OpB;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string err_msg = std::format("ALU M-ext: Invalid funct3: {}", (p_ALUFunct >> 1).to_ulong());
+                        throw RV32IM::ValueError (err_msg);
                         return 0;
                 }
             }
@@ -433,7 +435,8 @@ namespace RV32IM {
                         return p_OpA & p_OpB;
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string err_msg = std::format("ALU M-ext: Invalid funct3: {}", (p_ALUFunct >> 1).to_ulong());
+                        throw RV32IM::ValueError (err_msg);
                         return 0;
                 }
             }
@@ -471,7 +474,8 @@ namespace RV32IM {
                         return REMU(p_OpA, p_OpB);
 
                     default:
-                        std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
+                        std::string err_msg = std::format("ALU M-ext: Invalid funct3: {}", (p_ALUFunct >> 1).to_ulong());
+                        throw RV32IM::ValueError (err_msg);
                         return 0;
                 }
             }
