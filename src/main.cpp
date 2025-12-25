@@ -53,7 +53,7 @@ int main() {
                 std::filesystem::create_directories(result);
 
             result = result / machineCodeFile.filename();
-            
+
             RV32IM::CPU* cpu = new RV32IM::CPU(mySeg, result.string());
             cpu->Run();
         }

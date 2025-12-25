@@ -74,6 +74,11 @@ namespace RV32IM {
         }
     }
 
+    void Printer::RecordClearSignals (bool IF_ID_Clear, bool ID_EX_Clear) {
+        CurrentCycleSnapshot.IF_ID_Clear = IF_ID_Clear;
+        CurrentCycleSnapshot.ID_EX_Clear = ID_EX_Clear;
+    }
+
     void Printer::EndCycle (int cycle_num) {
         CurrentCycleSnapshot.cycle_number = cycle_num;
         History.push_back(CurrentCycleSnapshot);
@@ -104,6 +109,8 @@ namespace RV32IM {
         for (size_t i=0; i<StageName.size(); i++) {
             table.add_row( {StageName[i]} );
         }
+
+        table.add_row( {"Clear Signal"} );
 
         // Fill snap into each cell
         unsigned int ClockIdx = 0;
@@ -180,6 +187,12 @@ namespace RV32IM {
             }
             table.row(5)[ClockIdx].set_text(oss.str());
 
+            // Clear Signal
+            oss.str("");
+            oss << "IF/ID  Clear                           : " << snap.IF_ID_Clear << std::endl;
+            oss << "ID/EXE Clear                           : " << snap.ID_EX_Clear << std::endl;
+            table.row(6)[ClockIdx].set_text(oss.str());
+
             Table registerTable;
             registerTable.add_row({"Register", "ABI Name", "Hex Value", "Decimal Value"});
 
@@ -249,7 +262,7 @@ namespace RV32IM {
         table.column(0).format()
                     .font_align(FontAlign::center);
 
-        table.row(6).format()
+        table.row(7).format()
                     .font_align(FontAlign::center);
 
         // Make row header aligns vertically center

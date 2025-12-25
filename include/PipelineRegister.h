@@ -8,8 +8,11 @@ namespace RV32IM {
         private:
             T in;
             T out;
+            bool clear;
 
         public:
+            PipelineRegister() : in(T()), out(T()), clear(false) {}
+
             void Write(T p_In) {
                 in = p_In;
             };
@@ -19,12 +22,21 @@ namespace RV32IM {
             };
 
             void Update() {
+                // Flush pipeline register if clear signal is set
+                if (clear) {
+                    in = T();
+                    clear = false;
+                }
+
                 out = in;
             };
 
-            void Flush() {
-                in = T();
-                out = T();
+            bool GetClear() {
+                return clear;
+            };
+
+            void SetClear() {
+                clear = true;
             };
     };
 

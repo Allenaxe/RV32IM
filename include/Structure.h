@@ -114,6 +114,8 @@ namespace RV32IM {
         std::optional<EX_MEM_Data> EX_data;
         std::optional<MEM_WB_Data> MEM_data;
         std::optional<WB_Data>     WB_data;
+        bool IF_ID_Clear;
+        bool ID_EX_Clear;
         std::vector<uint32_t>      register_data;
     };
 

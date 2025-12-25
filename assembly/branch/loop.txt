@@ -1,0 +1,8 @@
+addi t0, zero, 0
+addi t1, zero, 1
+addi t2, zero, 6
+add t0, zero, t1
+addi t1, t1, 1
+blt t1, t2, -8
+add a0, t0, zero
+ecall

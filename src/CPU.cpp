@@ -17,11 +17,21 @@ namespace RV32IM {
         MEM_WB = {};
     }
 
-    void CPU::Fetch () {
+    IF_ID_Data CPU::Fetch () {
         MAR = PC;
         MDR = InstrMem.FetchInstr(DM->seg, MAR);
         IR = MDR;
+
         PC += 4;
+
+        std::cout << PC << std::endl;
+        std::cout << std::hex << IR << std::endl;
+        // std::cin.get();
+
+        return IF_ID_Data {
+            PC,
+            IR
+        };
     }
 
     ID_EX_Data CPU::Decode (IF_ID_Data& p_DecodeInput) {
@@ -36,6 +46,12 @@ namespace RV32IM {
         ControlSignal control_signal = ControlUnit::Generate(opcode, funct3, funct7);
 
         RegisterFileRead RF_read = RF->Read(rs1, rs2);
+
+        // Branch decision (for JAL)
+        if (control_signal.ex_ctrl.Jump) {
+            PC = p_DecodeInput.pc + imm;
+            IF_ID.SetClear();
+        }
 
         return ID_EX_Data {
             RF_read.rs1,
@@ -59,10 +75,20 @@ namespace RV32IM {
         int32_t opB = ALU::Generate_OpB(rs2, p_ExecuteInput.imm, p_ExecuteInput.ex_ctrl.ALUSrc);
         std::bitset<4> aluControl = ALU::AluControl(p_ExecuteInput.funct3.to_ulong(), p_ExecuteInput.funct7.to_ulong());
         ALU_OP_TYPE control_signal = p_ExecuteInput.ex_ctrl.ALUOp;
-        int32_t alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
+
+        std::tuple<uint32_t, bool> alu_output = ALU::Operate(aluControl, control_signal, opA, opB);
+        uint32_t alu_result = std::get<0>(alu_output);
+        bool zeroFlag = std::get<1>(alu_output);
+
+        // Branch decision (for JALR and B-type)
+        if (p_ExecuteInput.ex_ctrl.Branch && zeroFlag) {
+            PC = alu_result;
+            IF_ID.SetClear();
+            ID_EX.SetClear();
+        }
 
         return EX_MEM_Data {
-            static_cast<uint32_t>(alu_output),
+            static_cast<uint32_t>(alu_result),
             p_ExecuteInput.rs2,
             p_ExecuteInput.rd,
             p_ExecuteInput.mem_ctrl,
@@ -112,17 +138,17 @@ namespace RV32IM {
             WB_Data writeback_output = WriteBack(writeback_input);
             Record->RecordState(writeback_output);
 
-            // Execute (EX) Stage
-            ID_EX_Data execute_input = ID_EX.Read();
-            EX_MEM_Data execute_output = Execute(execute_input);
-            Record->RecordState(execute_output);
-            EX_MEM.Write(execute_output);
-
             // Memory (MEM) Stage
             EX_MEM_Data memory_input = EX_MEM.Read();
             MEM_WB_Data memory_output = Memory(memory_input);
             Record->RecordState(memory_output);
             MEM_WB.Write(memory_output);
+
+            // Execute (EX) Stage
+            ID_EX_Data execute_input = ID_EX.Read();
+            EX_MEM_Data execute_output = Execute(execute_input);
+            Record->RecordState(execute_output);
+            EX_MEM.Write(execute_output);
 
             // Decode (ID) Stage
             IF_ID_Data decode_input = IF_ID.Read();
@@ -131,12 +157,15 @@ namespace RV32IM {
             ID_EX.Write(decode_output);
 
             // Fetch (IF) Stage
-            Fetch();
-            IF_ID_Data fetch_output {PC, IR};
+            IF_ID_Data fetch_output = Fetch();
             Record->RecordState(fetch_output);
             IF_ID.Write(fetch_output);
 
             Record->RecordState(RF);
+            Record->RecordClearSignals(IF_ID.GetClear(), ID_EX.GetClear());
+
+            std::cout << "IF_ID Clear: " << IF_ID.GetClear() << std::endl;
+            std::cout << "ID_EX Clear: " << ID_EX.GetClear() << std::endl;
 
             IF_ID.Update();
             ID_EX.Update();

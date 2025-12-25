@@ -21,6 +21,8 @@ namespace RV32IM {
         private:
             // Registers
             uint32_t PC;                            // Program Counter
+            uint32_t PC_next;                       // Storing next PC
+
             uint32_t MAR;                           // Memory Address Register
             uint32_t MDR;                           // Memory Data Register
             uint32_t IR;                            // Instruction Register
@@ -44,7 +46,7 @@ namespace RV32IM {
             InstructionMemory InstrMem;
 
             // Stages
-            void Fetch();
+            IF_ID_Data Fetch();
             ID_EX_Data Decode(IF_ID_Data& p_DecodeInput);
             EX_MEM_Data Execute(ID_EX_Data& p_ExecuteInput);
             MEM_WB_Data Memory(EX_MEM_Data& p_MemoryInput);
@@ -53,12 +55,19 @@ namespace RV32IM {
             // Utility
             Printer* Record;
 
+            // Constant
+            const uint32_t NOP_INSTR = 0x000002b3;    // ADD t0, zero, zero
+
         public:
             CPU(std::unique_ptr<Segmentation>& p_ProgSeg,
                 std::string p_TableFilename);
             // ~CPU();
             // void Reset();
             void Run();
+
+            // For accessing clear signal
+            friend class Controlunit;
+            friend class Printer;
     };
 
 }

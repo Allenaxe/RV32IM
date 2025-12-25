@@ -174,7 +174,7 @@ namespace RV32IM {
         uint64_t r = mul64_signed(p_OpA, p_OpB);
         return (uint32_t)(r >> 32);
     }
-    
+
     uint32_t ALU::MULHSU(int32_t p_OpA, uint32_t p_OpB)
     {
         uint64_t r = mul64_mixed(p_OpA, p_OpB);
@@ -260,28 +260,31 @@ namespace RV32IM {
         return p_Selector ? imm : p_Src2;
     }
 
-    uint32_t ALU::Operate (std::bitset<4> p_ALUFunct,
-                          ALU_OP_TYPE p_ALUOp,
-                          uint32_t p_OpA,
-                          uint32_t p_OpB)
+    std::tuple<uint32_t, bool> ALU::Operate (std::bitset<4> p_ALUFunct,
+                                ALU_OP_TYPE p_ALUOp,
+                                uint32_t p_OpA,
+                                uint32_t p_OpB)
     {
         bool carryOut = false; // Carry Flag
         uint32_t complement;
+        uint32_t result = 0;
+        bool zeroFlag = false;
 
         switch (p_ALUOp) {
             // Load / Store
-            case ALU_OP_TYPE::MEMORY_REF: {
-                return p_OpA + p_OpB;
-            }
+            case ALU_OP_TYPE::MEMORY_REF:
+                result = p_OpA + p_OpB;
+                break;
 
             // LUI
-            case ALU_OP_TYPE::LUI: {
-                return p_OpB;
-            }
+            case ALU_OP_TYPE::LUI:
+                result = p_OpB;
+                break;
+
             // AUIPC
-            case ALU_OP_TYPE::AUIPC: {
-                return p_OpA + p_OpB;
-            }
+            case ALU_OP_TYPE::AUIPC:
+                result = p_OpA + p_OpB;
+                break;
 
             // Branch
             case ALU_OP_TYPE::BRANCH: {
@@ -289,102 +292,134 @@ namespace RV32IM {
                 switch ((p_ALUFunct >> 1).to_ulong()) {
 
                     // BEQ
-                    case 000:
-                        if(p_OpA == p_OpB)          // Jump: return PC + imm
-                            return p_OpA + p_OpB;
+                    case 0b000:
+                        if(p_OpA == p_OpB){         // Jump: return PC + imm
+                            zeroFlag = true;
+                            result = p_OpA + p_OpB;
+                        }
                         else                        // Next instrution: return PC + 4
-                            return p_OpA + 4;
+                            result = p_OpA + 4;
+                        break;
 
                     // BNE
-                    case 001:
-                        if(p_OpA != p_OpB)          // Jump: return PC + imm
-                            return p_OpA + p_OpB;
+                    case 0b001:
+                        if(p_OpA != p_OpB){         // Jump: return PC + imm
+                            zeroFlag = true;
+                            result = p_OpA + p_OpB;
+                        }
                         else                        // Next instrution: return PC + 4
-                            return p_OpA + 4;
+                            result = p_OpA + 4;
+                        break;
 
                     // BLT
-                    case 100:
-                        if (p_OpA < p_OpB)          // Jump: return PC + imm
-                            return p_OpA + p_OpB;
+                    case 0b100:
+                        std::cout << "BLT comparing " << p_OpA << " and " << p_OpB << std::endl;
+                        if (p_OpA < p_OpB){         // Jump: return PC + imm
+                            std::cout << "BLT taken\n" << std::endl;
+                            zeroFlag = true;
+                            result = p_OpA + p_OpB;
+                        }
                         else                        // Next instrution: return PC + 4
-                            return p_OpA + 4;
+                            result = p_OpA + 4;
+                        break;
 
                     // BGE
-                    case 101:
-                        if (p_OpA >= p_OpB)         // Jump: return PC + imm
-                            return p_OpA + p_OpB;
+                    case 0b101:
+                        if (p_OpA >= p_OpB){        // Jump: return PC + imm
+                            zeroFlag = true;
+                            result = p_OpA + p_OpB;
+                        }
                         else                        // Next instrution: return PC + 4
-                            return p_OpA + 4;
+                            result = p_OpA + 4;
+                        break;
 
                     // BLTU
-                    case 110:
-                        if (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) // Jump: return PC + imm
-                            return p_OpA + p_OpB;
-                        else                                                             // Next instrution: return PC + 4
-                            return p_OpA + 4;
+                    case 0b110:
+                        if (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)){ // Jump: return PC + imm
+                            zeroFlag = true;
+                            result = p_OpA + p_OpB;
+                        }
+                        else                                                              // Next instrution: return PC + 4
+                            result = p_OpA + 4;
+                        break;
 
                     // BGEU
-                    case 111:
-                        if (static_cast<uint32_t>(p_OpA) >= static_cast<uint32_t>(p_OpB)) // Jump: return PC + imm
-                            return p_OpA + p_OpB;
-                        else                                                              // Next instrution: return PC + 4
-                            return p_OpA + 4;
+                    case 0b111:
+                        if (static_cast<uint32_t>(p_OpA) >= static_cast<uint32_t>(p_OpB)){ // Jump: return PC + imm
+                            zeroFlag = true;
+                            result = p_OpA + p_OpB;
+                        }
+                        else                                                               // Next instrution: return PC + 4
+                            result = p_OpA + 4;
+                        break;
 
                     default:
                         std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
-                        return 0;
+                        result = 0;
                 }
             }
+            break;
 
             case ALU_OP_TYPE::R_TYPE: {
                 switch (p_ALUFunct.to_ulong()) {
                     // ADD
                     case 0b0000:
-                        return Adder(p_OpA, p_OpB, false, carryOut);
+                        result = Adder(p_OpA, p_OpB, false, carryOut);
+                        break;
 
                     // SUB
                     case 0b0001:
                         complement = ~static_cast<uint32_t>(p_OpB);
-                        return Adder(p_OpA, complement, true, carryOut);
-
+                        result = Adder(p_OpA, complement, true, carryOut);
+                        break;
 
                     // SLL
                     case 0b0010:
-                        return p_OpA << (p_OpB & 0x1F);
+                        result = p_OpA << (p_OpB & 0x1F);
+                        break;
 
                     // SLT
                     case 0b0100:
-                        return (p_OpA < p_OpB) ? 1 : 0;
+                        result = (p_OpA < p_OpB) ? 1 : 0;
+                        break;
 
                      // SLTU
                     case 0b0110:
-                        return (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) ? 1 : 0;
+                        result = (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) ? 1 : 0;
+                        break;
 
                     // XOR
                     case 0b1000:
-                        return p_OpA ^ p_OpB;
+                        result = p_OpA ^ p_OpB;
+                        break;
 
                     // SRL
                     case 0b1010:
-                        return static_cast<uint32_t>(p_OpA) >> (p_OpB & 0x1F);
+                        result = static_cast<uint32_t>(p_OpA) >> (p_OpB & 0x1F);
+                        break;
 
                     // SRA
                     case 0b1011:
-                        return p_OpA >> (p_OpB & 0x1F);
+                        result = p_OpA >> (p_OpB & 0x1F);
+                        break;
 
                     // OR
                     case 0b1100:
-                        return p_OpA | p_OpB;
+                        result = p_OpA | p_OpB;
+                        break;
 
                     // AND
                     case 0b1110:
-                        return p_OpA & p_OpB;
+                        result = p_OpA & p_OpB;
+                        break;
 
                     default:
                         std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
-                        return 0;
+                        result = 0;
+                        break;
                 }
             }
+            break;
 
             case ALU_OP_TYPE::I_TYPE: {
                 switch (p_ALUFunct.to_ulong()) {
@@ -392,93 +427,118 @@ namespace RV32IM {
                     // ADDI
                     case 0b0000:
                     case 0b0001:
-                        return Adder(p_OpA, p_OpB, false, carryOut);
+                        result = Adder(p_OpA, p_OpB, false, carryOut);
+                        break;
 
                     // SLLI
                     case 0b0010:
-                        return p_OpA << (p_OpB & 0x1F);
+                        result = p_OpA << (p_OpB & 0x1F);
+                        break;
 
                     // SLTI
                     case 0b0100:
                     case 0b0101:
-                        return (p_OpA < p_OpB) ? 1 : 0;
+                        result = (p_OpA < p_OpB) ? 1 : 0;
+                        break;
 
                     // SLTIU
                     case 0b0110:
                     case 0b0111:
-                        return (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) ? 1 : 0;
+                        result = (static_cast<uint32_t>(p_OpA) < static_cast<uint32_t>(p_OpB)) ? 1 : 0;
+                        break;
 
                     // XORI
                     case 0b1001:
                     case 0b1000:
-                        return p_OpA ^ p_OpB;
+                        result = p_OpA ^ p_OpB;
+                        break;
 
                      // SRLI
                     case 0b1010:
-                        return static_cast<uint32_t>(p_OpA) >> (p_OpB & 0x1F);
+                        result = static_cast<uint32_t>(p_OpA) >> (p_OpB & 0x1F);
+                        break;
 
                     // SRAI
                     case 0b1011:
-                        return p_OpA >> (p_OpB & 0x1F);
-
+                        result = p_OpA >> (p_OpB & 0x1F);
+                        break;
 
                     // ORI
                     case 0b1100:
                     case 0b1101:
-                        return p_OpA | p_OpB;
+                        result = p_OpA | p_OpB;
+                        break;
 
                     // ANDI
                     case 0b1110:
                     case 0b1111:
-                        return p_OpA & p_OpB;
+                        result = p_OpA & p_OpB;
+                        break;
 
                     default:
                         std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
-                        return 0;
+                        result = 0;
+                        break;
                 }
             }
+            break;
 
             case ALU_OP_TYPE::M_Extension: {
-
                 switch ((p_ALUFunct >> 1).to_ulong()) {
                     // MUL
                     case 0b000:
-                        return MUL(p_OpA, p_OpB);
+                        result = MUL(p_OpA, p_OpB);
+                        break;
 
                     // MULH
                     case 0b001:
-                        return MULH(p_OpA, p_OpB);
+                        result = MULH(p_OpA, p_OpB);
+                        break;
 
 
                     // MULSHU
                     case 0b010:
-                        return MULHSU(p_OpA, p_OpB);
+                        result = MULHSU(p_OpA, p_OpB);
+                        break;
 
                     // MULHU
                     case 0b011:
-                        return MULHU(p_OpA, p_OpB);
+                        result = MULHU(p_OpA, p_OpB);
+                        break;
 
+                    // DIV
                     case 0b100:
-                        return DIV(p_OpA, p_OpB);
+                        result = DIV(p_OpA, p_OpB);
+                        break;
 
+                    // DIVU
                     case 0b101:
-                        return DIVU(p_OpA, p_OpB);
+                        result = DIVU(p_OpA, p_OpB);
+                        break;
 
+                    // REM
                     case 0b110:
-                        return REM(p_OpA, p_OpB);
+                        result = REM(p_OpA, p_OpB);
+                        break;
 
+                    // REMU
                     case 0b111:
-                        return REMU(p_OpA, p_OpB);
+                        result = REMU(p_OpA, p_OpB);
+                        break;
 
                     default:
                         std::cerr << "Invaild [funct3]: " << (p_ALUFunct >> 1) << " !" << std::endl;
-                        return 0;
+                        result = 0;
+                        break;
                 }
             }
+            break;
 
             default:
-                return 0;
+                result = 0;
         }
+
+        return std::make_tuple(result, zeroFlag);
     }
 
 }

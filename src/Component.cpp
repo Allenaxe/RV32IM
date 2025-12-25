@@ -1,5 +1,6 @@
 #include "Component.h"
 #include "Exception.h"
+#include "CPU.h"
 
 namespace RV32IM {
 
@@ -21,21 +22,22 @@ namespace RV32IM {
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];     // if p_Opcode == 0b0010011
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];     // if p_Opcode == 0b0100011
         bool isBType = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];        // if p_Opcode == 0b1100011
-        bool isJType = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & p_Opcode[3] & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];              // if p_Opcode == 0b1101111
 
         bool isLOAD = (~p_Opcode[6]) & (~p_Opcode[5]) & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];   // if p_Opcode == 0b0000011
+        bool isJAL = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & p_Opcode[3] & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];                // if p_Opcode == 0b1101111
         bool isJALR = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];            // if p_Opcode == 0b1100111
         bool isLUI = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];             // if p_Opcode == 0b0110111
         bool isAUIPC = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];        // if p_Opcode == 0b0010111
         bool isECALL = p_Opcode[6] & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];           // if p_Opcode == 0b1110011
 
-        bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJType;
+        bool RegWrite = isRType | isIType | isLOAD | isLUI | isAUIPC | isJAL;
+
         bool ALUSrc = isIType | isLOAD | isSType | isLUI | isAUIPC;
 
         MEM_RW MemRW =  static_cast<MEM_RW>((isSType << 1) & isLOAD);
 
-        bool Branch = isBType;
-        bool Jump = isJType | isJALR;
+        bool Branch = isBType | isJAL | isJALR;     // stall two cycles
+        bool Jump = isJAL;                          // stall one cycle
         bool MemtoReg = isLOAD;
         bool Halt = isECALL;
 
@@ -64,9 +66,10 @@ namespace RV32IM {
         bool isIType = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];     // if p_Opcode == 0b0010011
         bool isSType = (~p_Opcode[6]) & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];     // if p_Opcode == 0b0100011
         bool isBType = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];        // if p_Opcode == 0b1100011
-        bool isJType = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & p_Opcode[3] & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];              // if p_Opcode == 0b1101111
+
 
         bool isLOAD = (~p_Opcode[6]) & (~p_Opcode[5]) & (~p_Opcode[4]) & (~p_Opcode[3]) & (~p_Opcode[2]) & p_Opcode[1] & p_Opcode[0];   // if p_Opcode == 0b0000011
+        bool isJAL = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & p_Opcode[3] & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];                // if p_Opcode == 0b1101111
         bool isJALR = p_Opcode[6] & p_Opcode[5] & (~p_Opcode[4]) & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];            // if p_Opcode == 0b1100111
         bool isLUI = (~p_Opcode[6]) & p_Opcode[5] & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];             // if p_Opcode == 0b0110111
         bool isAUIPC = (~p_Opcode[6]) & (~p_Opcode[5]) & p_Opcode[4] & (~p_Opcode[3]) & p_Opcode[2] & p_Opcode[1] & p_Opcode[0];        // if p_Opcode == 0b0010111
@@ -76,7 +79,7 @@ namespace RV32IM {
             (isIType    << 7) |
             (isSType    << 6) |
             (isBType    << 5) |
-            (isJType    << 4) |
+            (isJAL      << 4) |
             (isLOAD     << 3) |
             (isJALR     << 2) |
             (isLUI      << 1) |

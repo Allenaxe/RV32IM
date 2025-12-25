@@ -39,6 +39,7 @@ namespace RV32IM {
             void RecordState(const MEM_WB_Data& p_Ddata);
             void RecordState(const WB_Data& p_Ddata);
             void RecordState (RegisterFile* RF);
+            void RecordClearSignals (bool IF_ID_Clear, bool ID_EX_Clear);
             void EndCycle(int cycle_num);
             void PrintTable ();
     };
